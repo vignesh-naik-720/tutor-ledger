@@ -1,3 +1,4 @@
 {
-    "nexenAi.autoApprove.writes": true
+    "nexenAi.autoApprove.writes": true,
+    "nexenAi.autoApprove.terminal": true
 }
