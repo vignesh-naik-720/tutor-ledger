@@ -2,7 +2,8 @@ import { readdir, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Client } from 'pg';
+import pg from 'pg';
+const { Client } = pg;
 
 // Migrations run under the MIGRATION role, which is never used at request time.
 // Files are applied in lexical order, once each, inside a transaction.

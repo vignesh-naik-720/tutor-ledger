@@ -1,0 +1,17 @@
+{
+  "name": "tutor-ledger-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Tutor Ledger: WhatsApp-first mobile back office for solo home tutors",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "test:shared": "npm --prefix shared/forecast test",
+    "test:backend": "npm --prefix backend test",
+    "test": "npm --prefix shared/forecast test && npm --prefix backend test",
+    "build:shared": "npm --prefix shared/forecast run build",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm run build:shared && npm run build:backend && npm run build:frontend"
+  }
+}

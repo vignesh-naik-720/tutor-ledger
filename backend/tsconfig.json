@@ -9,9 +9,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "outDir": "dist",
-    "rootDir": "src",
     "types": ["node"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "../shared/forecast/src/**/*.ts"],
   "exclude": ["tests/**"]
 }

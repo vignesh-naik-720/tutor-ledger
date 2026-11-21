@@ -50,3 +50,23 @@ export function describeInternalError(err: unknown): Record<string, unknown> {
   const name = err instanceof Error ? err.name : 'UnknownError';
   return redactValue({ err_type: name, request_id: randomUUID() }) as Record<string, unknown>;
 }
+
+/** Fastify global error handler matching the spec error envelope */
+export function errorHandler(error: any, _request: any, reply: any): void {
+  const statusCode = typeof error.statusCode === 'number' ? error.statusCode : 500;
+  const code: ErrorCode =
+    error.code && error.code in ERROR_MESSAGES
+      ? (error.code as ErrorCode)
+      : statusCode === 404
+        ? 'NOT_FOUND'
+        : statusCode === 401
+          ? 'UNAUTHENTICATED'
+          : statusCode === 403
+            ? 'FORBIDDEN'
+            : statusCode === 409
+              ? 'CONFLICT'
+              : 'INTERNAL';
+
+  const fields = Array.isArray(error.fields) ? error.fields : [];
+  reply.code(statusCode).send(buildErrorEnvelope(code, fields));
+}
