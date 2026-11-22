@@ -51,7 +51,17 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     try {
       const json = await res.json();
       errorDetail = json.error?.message || json.error?.code || errorDetail;
-    } catch {}
+    } catch {
+      try {
+        const text = await res.text();
+        if (text && text.includes('ECONNREFUSED')) {
+          errorDetail = 'Backend server (port 3001) is not running. Please start the backend.';
+        }
+      } catch {}
+    }
+    if (res.status === 502 || res.status === 503 || res.status === 504) {
+      errorDetail = 'Backend server is not reachable. Please start the backend service.';
+    }
     const err = new Error(errorDetail);
     (err as any).status = res.status;
     throw err;

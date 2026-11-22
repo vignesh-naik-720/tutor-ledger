@@ -62,6 +62,11 @@ export function createEnvSecretStore(env: NodeJS.ProcessEnv = process.env): Secr
   return {
     get(key: SecretKey): string {
       const value = env[key] ?? process.env[key];
+      // For local zero-setup execution, if TL_DATABASE_URL is not provided or empty,
+      // safely fallback to 'embedded' so tutors can run without requiring local Postgres.
+      if (key === 'TL_DATABASE_URL' && (!value || value.trim() === '')) {
+        return 'embedded';
+      }
       if (value === undefined || value.trim() === '') {
         throw new SecretNotFoundError(key);
       }

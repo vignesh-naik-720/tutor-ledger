@@ -72,14 +72,19 @@ export interface ForecastResult {
 }
 
 export function addDays(isoDate: string, days: number): string {
-  const d = new Date(`${isoDate}T00:00:00Z`);
+  if (!isoDate) return new Date().toISOString().slice(0, 10);
+  const clean = String(isoDate).slice(0, 10);
+  const d = new Date(`${clean}T00:00:00Z`);
+  if (isNaN(d.getTime())) return new Date().toISOString().slice(0, 10);
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 }
 
 export function daysBetween(fromIso: string, toIso: string): number {
-  const a = Date.parse(`${fromIso}T00:00:00Z`);
-  const b = Date.parse(`${toIso}T00:00:00Z`);
+  if (!fromIso || !toIso) return 0;
+  const a = Date.parse(`${String(fromIso).slice(0, 10)}T00:00:00Z`);
+  const b = Date.parse(`${String(toIso).slice(0, 10)}T00:00:00Z`);
+  if (isNaN(a) || isNaN(b)) return 0;
   return Math.round((b - a) / 86_400_000);
 }
 

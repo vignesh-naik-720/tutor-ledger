@@ -180,12 +180,50 @@ function parsePaymentMessageLocal(
   const isPartial =
     /part|partial|remaining|balance|rest|next\s*week|next\s*month|advance/i.test(text);
 
-  // Match family name if known
+  // Match family name if known (first try direct match, then token match, then NLP extraction)
   let familyCandidate: string | null = null;
+  // 1. Direct match
   for (const name of knownFamilyNames) {
     if (new RegExp(`\\b${escapeRegExp(name)}\\b`, 'i').test(text)) {
       familyCandidate = name;
       break;
+    }
+  }
+
+  // 2. Token match (e.g. "Patel", "Sharma", "Aarav", "Priya", "Rohan", "Ananya")
+  if (!familyCandidate) {
+    for (const fullName of knownFamilyNames) {
+      const tokens = fullName
+        .replace(/family|class|th|maths|physics|science|chemistry|foundation|\d+|[()\-_]/gi, ' ')
+        .split(/\s+/)
+        .map((t) => t.trim())
+        .filter((t) => t.length >= 3);
+
+      for (const token of tokens) {
+        if (new RegExp(`\\b${escapeRegExp(token)}\\b`, 'i').test(text)) {
+          familyCandidate = fullName;
+          break;
+        }
+      }
+      if (familyCandidate) break;
+    }
+  }
+
+  // 3. Natural language extraction: "for <Name>", "from <Name>", "by <Name>"
+  if (!familyCandidate) {
+    const nameMatch = /(?:for|from|by|student|child|son|daughter)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/i.exec(text);
+    if (nameMatch?.[1]) {
+      const extracted = nameMatch[1].trim();
+      // Check if extracted matches any known family token
+      for (const fullName of knownFamilyNames) {
+        if (fullName.toLowerCase().includes(extracted.toLowerCase())) {
+          familyCandidate = fullName;
+          break;
+        }
+      }
+      if (!familyCandidate) {
+        familyCandidate = extracted;
+      }
     }
   }
 

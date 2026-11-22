@@ -85,11 +85,18 @@ export async function setupRoutes(app: FastifyInstance, deps: ApiDeps, setupSecr
 
     // Create immediate session so the owner is signed in right away
     const session = await createSession(ledgerId, deps.pepper);
+    const isProduction = process.env.NODE_ENV === 'production';
     reply.setCookie('__Host-tl_session', session.sessionId, {
       path: '/',
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'lax',
+    });
+    reply.setCookie('tl_session', session.sessionId, {
+      path: '/',
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
     });
 
     return reply.code(201).send({

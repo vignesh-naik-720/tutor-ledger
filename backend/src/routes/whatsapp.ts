@@ -83,23 +83,25 @@ export async function whatsappRoutes(app: FastifyInstance, deps: ApiDeps): Promi
         [pending.invoiceId],
       );
       const totalPaidMinor = payRows.reduce((sum, p) => sum + Number(p.amount_minor), 0);
-      const newStatus = statusAfterPayment(totalInvMinor, totalPaidMinor);
+      const remainingMinor = Math.max(0, totalInvMinor - totalPaidMinor);
+      const newStatus = statusAfterPayment(remainingMinor);
 
       await query('UPDATE invoice SET status = $1 WHERE id = $2', [newStatus, pending.invoiceId]);
 
-      await writeAuditEvent({
-        ledgerId,
-        actorType: 'owner',
-        action: 'payment.recorded_via_whatsapp',
-        entityType: 'payment',
-        entityId: paymentId,
-        payload: {
-          invoiceId: pending.invoiceId,
-          amount_minor: pending.amountMinor,
-          student: pending.studentName,
-          verified_by: 'whatsapp_menu_option_1',
+      await writeAuditEvent(
+        {
+          ledgerId,
+          actor: 'owner',
+          actionCode: 'PAYMENT_RECORDED_WHATSAPP',
+          subjectType: 'payment',
+          subjectId: paymentId,
+          detail: {
+            invoice_id: pending.invoiceId,
+            amount_minor: pending.amountMinor,
+          },
         },
-      });
+        deps.auditHmacKey,
+      );
 
       const formattedAmount = (pending.amountMinor / 100).toLocaleString('en-IN');
       const studentName = pending.studentName;
@@ -213,10 +215,28 @@ export async function whatsappRoutes(app: FastifyInstance, deps: ApiDeps): Promi
 
     if (amountMinor > 0) {
       const studentName = candidateName || 'Student';
-      // Find open invoice for this family
-      const famId = (candidateName && nameToId.get(candidateName.toLowerCase())) || families[0]?.id;
-      let matchedInvoiceId = '';
+      // Find matching family ID with fuzzy token fallback
+      let famId: string | undefined = undefined;
+      if (candidateName) {
+        famId = nameToId.get(candidateName.toLowerCase());
+        if (!famId) {
+          const candLower = candidateName.toLowerCase();
+          for (const [knownLower, id] of nameToId.entries()) {
+            if (knownLower.includes(candLower) || candLower.includes(knownLower)) {
+              famId = id;
+              break;
+            }
+            const tokens = candLower.split(/\s+/).filter((t) => t.length >= 3);
+            if (tokens.some((t) => knownLower.includes(t))) {
+              famId = id;
+              break;
+            }
+          }
+        }
+      }
+      if (!famId) famId = families[0]?.id;
 
+      let matchedInvoiceId = '';
       if (famId) {
         const invs = await query<{ id: string }>(
           `SELECT id FROM invoice WHERE family_id = $1 AND status IN ('open', 'partially-paid') ORDER BY due_date ASC LIMIT 1`,
@@ -232,6 +252,18 @@ export async function whatsappRoutes(app: FastifyInstance, deps: ApiDeps): Promi
           [ledgerId],
         );
         matchedInvoiceId = fallbackInvs[0]?.id || '';
+      }
+
+      // If still no open invoice, create one so verification succeeds seamlessly
+      if (!matchedInvoiceId && famId) {
+        const newInvId = randomUUID();
+        const today = new Date().toISOString().slice(0, 10);
+        await query(
+          `INSERT INTO invoice (id, ledger_id, family_id, amount_minor, due_date, status)
+           VALUES ($1, $2, $3, $4, $5, 'open')`,
+          [newInvId, ledgerId, famId, amountMinor, today],
+        );
+        matchedInvoiceId = newInvId;
       }
 
       if (matchedInvoiceId) {

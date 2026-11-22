@@ -275,22 +275,22 @@ export async function loadSampleData(ledgerId: string, fieldKey: Buffer): Promis
   // Bill 1: Tuition Room Rent ₹12,000/mo due 1st of month
   await query(
     `INSERT INTO recurring_bill (id, ledger_id, name, amount_minor, frequency, next_due_date, is_active, is_sample_data)
-     VALUES ($1, $2, 'Tuition Classroom Rent & Power', 1200000, 'monthly', $3, TRUE, TRUE)`,
-    [randomUUID(), ledgerId, addDays(today, 5)],
+     VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE)`,
+    [randomUUID(), ledgerId, 'Tuition Classroom Rent & Power', 1200000, 'monthly', addDays(today, 5)],
   );
 
   // Bill 2: Internet & LMS teaching tools ₹2,500/mo
   await query(
     `INSERT INTO recurring_bill (id, ledger_id, name, amount_minor, frequency, next_due_date, is_active, is_sample_data)
-     VALUES ($1, $2, 'High-Speed Broadband & Zoom LMS', 250000, 'monthly', $3, TRUE, TRUE)`,
-    [randomUUID(), ledgerId, addDays(today, 12)],
+     VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE)`,
+    [randomUUID(), ledgerId, 'High-Speed Broadband & Zoom LMS', 250000, 'monthly', addDays(today, 12)],
   );
 
   // Week 7 Cash Dip: Special Workshop & Annual Prep Materials ₹22,000 in week 7 (+45 days)
   await query(
     `INSERT INTO one_off_expense (id, ledger_id, description, amount_minor, expense_date)
-     VALUES ($1, $2, 'Annual Mock Test Prints & Science Lab Kits (Week 7 Dip)', 2200000, $3)`,
-    [randomUUID(), ledgerId, addDays(today, 45)],
+     VALUES ($1, $2, $3, $4, $5)`,
+    [randomUUID(), ledgerId, 'Annual Mock Test Prints & Science Lab Kits - Week 7 Dip', 2200000, addDays(today, 45)],
   );
 
   return {

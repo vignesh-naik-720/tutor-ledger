@@ -25,6 +25,7 @@ import { AiAssistantView } from './features/ai/AiAssistantView';
 import { InvoicesView } from './features/invoices/InvoicesView';
 import { FamiliesView } from './features/families/FamiliesView';
 import { SettingsView } from './features/settings/SettingsView';
+import { StandaloneWhatsAppView } from './features/whatsapp/StandaloneWhatsAppView';
 
 import {
   LayoutDashboard,
@@ -49,6 +50,10 @@ export default function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (localStorage.getItem('tutor_ledger_theme') as 'light' | 'dark') || 'light';
   });
+
+  const isStandaloneWhatsApp =
+    typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('view') === 'whatsapp';
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -166,6 +171,35 @@ export default function App() {
     }
   };
 
+  // Real-time synchronization across windows/tabs (e.g., when WhatsApp confirms payment)
+  useEffect(() => {
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel('tutor_ledger_sync');
+      channel.onmessage = (event) => {
+        if (event.data?.type === 'REFRESH_LEDGER') {
+          loadData();
+        }
+      };
+    } catch {}
+    return () => channel?.close();
+  }, [loadData]);
+
+  // If opening in standalone WhatsApp window mode
+  if (isStandaloneWhatsApp) {
+    return (
+      <StandaloneWhatsAppView
+        families={families}
+        invoices={invoices}
+        currencySymbol={currencySymbol}
+        onRefreshLedger={loadData}
+        onBackToApp={() => {
+          window.location.href = '/';
+        }}
+      />
+    );
+  }
+
   if (authenticated === null) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: 'var(--text-muted)' }}>
@@ -241,6 +275,33 @@ export default function App() {
                   <span style={{ fontWeight: 600 }}>Light</span>
                 </>
               )}
+            </button>
+
+            {/* Launch WhatsApp Companion Window Button */}
+            <button
+              className="btn-secondary desktop-nav-tabs"
+              style={{
+                padding: '6px 12px',
+                fontSize: '0.8rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                color: '#00a884',
+                borderColor: 'rgba(0, 168, 132, 0.4)',
+                background: 'rgba(0, 168, 132, 0.08)',
+                fontWeight: 600,
+              }}
+              onClick={() =>
+                window.open(
+                  '/?view=whatsapp',
+                  'TutorWhatsAppWindow',
+                  'width=540,height=840,menubar=no,toolbar=no,location=no,status=no',
+                )
+              }
+              title="Launch Tutor's WhatsApp Companion in a separate side-by-side window"
+            >
+              <Smartphone size={14} color="#00a884" />
+              WhatsApp Window
             </button>
 
             <button

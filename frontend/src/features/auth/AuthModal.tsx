@@ -23,17 +23,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthenticated, ownerExis
 
     try {
       if (isSetup) {
-        await api.setupOwner({
-          setup_secret: setupSecret,
-          password,
-          currency_code: currency,
-          minimum_balance_minor: parseInt(minBalance, 10) * 100,
-        });
-        // Auto-load sample data for immediate usability
         try {
-          await api.loadSampleData();
-        } catch {}
-        onAuthenticated();
+          await api.setupOwner({
+            setup_secret: setupSecret,
+            password,
+            currency_code: currency,
+            minimum_balance_minor: parseInt(minBalance, 10) * 100,
+          });
+          // Auto-load sample data for immediate usability
+          try {
+            await api.loadSampleData();
+          } catch { }
+          onAuthenticated();
+        } catch (setupErr: any) {
+          // If owner already exists, seamlessly attempt login
+          if (setupErr.status === 409 || setupErr.message?.toLowerCase().includes('conflict')) {
+            await api.login(password);
+            onAuthenticated();
+          } else {
+            throw setupErr;
+          }
+        }
       } else {
         await api.login(password);
         onAuthenticated();
@@ -49,21 +59,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthenticated, ownerExis
     setError(null);
     setLoading(true);
     try {
-      if (!ownerExists) {
-        await api.setupOwner({
-          setup_secret: 'TUTOR_LEDGER_DEV_SECRET_2026',
-          password: 'Password123456',
-          currency_code: 'INR',
-          minimum_balance_minor: 1000000,
-        });
-        await api.loadSampleData();
-        onAuthenticated();
-      } else {
+      // First attempt standard demo login
+      try {
         await api.login('Password123456');
         onAuthenticated();
+        return;
+      } catch (loginErr: any) {
+        // If login failed because owner is not set up, perform initial setup
+        if (loginErr.status === 401 || !ownerExists) {
+          await api.setupOwner({
+            setup_secret: 'TUTOR_LEDGER_DEV_SECRET_2026',
+            password: 'Password123456',
+            currency_code: 'INR',
+            minimum_balance_minor: 1000000,
+          });
+          await api.loadSampleData();
+          onAuthenticated();
+          return;
+        }
+        throw loginErr;
       }
     } catch (err: any) {
-      // If login fails, retry setup or report
       setError(err.message || 'Demo sign-in failed');
     } finally {
       setLoading(false);

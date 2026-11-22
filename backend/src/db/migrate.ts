@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { readdir, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
@@ -9,10 +10,31 @@ const { Client } = pg;
 // Files are applied in lexical order, once each, inside a transaction.
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-export const MIGRATIONS_DIR = path.resolve(here, '..', '..', 'migrations');
+
+function resolveMigrationsDir(): string {
+  const candidates = [
+    path.resolve(here, '..', '..', 'migrations'),
+    path.resolve(here, '..', '..', '..', 'migrations'),
+    path.resolve(here, '..', '..', '..', 'backend', 'migrations'),
+    path.resolve(process.cwd(), 'migrations'),
+    path.resolve(process.cwd(), 'backend', 'migrations'),
+  ];
+  for (const c of candidates) {
+    if (existsSync(c)) return c;
+  }
+  return path.resolve(here, '..', '..', 'migrations');
+}
+
+export const MIGRATIONS_DIR = resolveMigrationsDir();
 
 export async function runMigrations(connectionString: string): Promise<string[]> {
-  const client = new Client({ connectionString, ssl: { rejectUnauthorized: true } });
+  const ssl =
+    connectionString.includes('localhost') ||
+    connectionString.includes('127.0.0.1') ||
+    connectionString.includes('postgres')
+      ? false
+      : { rejectUnauthorized: true };
+  const client = new Client({ connectionString, ssl });
   await client.connect();
   const applied: string[] = [];
   try {

@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
-import pg, { type QueryResultRow } from 'pg';
+import pg, { type QueryResultRow, type Pool as PgPool } from 'pg';
 
 const { Pool } = pg;
 
@@ -10,7 +10,7 @@ const { Pool } = pg;
 //    is unreachable (e.g. when running without Docker locally), so tutors and reviewers
 //    can test and run the application instantly out of the box!
 
-let pool: Pool | null = null;
+let pool: PgPool | null = null;
 let isPostgresAvailable: boolean | null = null;
 
 // Embedded Table Store for instant zero-dependency execution
@@ -90,7 +90,11 @@ function persistStore(): void {
 
 loadStore();
 
-export function getPool(connectionString: string): Pool {
+export function getPool(connectionString?: string): PgPool | null {
+  if (!connectionString || connectionString.trim() === '' || connectionString === 'embedded' || connectionString === 'sqlite') {
+    isPostgresAvailable = false;
+    return null;
+  }
   if (!pool) {
     pool = new Pool({
       connectionString,
@@ -172,8 +176,10 @@ function executeInMemoryQuery<T>(text: string, params: readonly unknown[]): T[] 
     let paramIdx = 0;
     for (let i = 0; i < cols.length; i++) {
       const col = cols[i]!;
-      const placeholder = valPlaceholders[i]!;
-      if (placeholder.startsWith('$')) {
+      const placeholder = valPlaceholders[i];
+      if (!placeholder) {
+        row[col] = params[paramIdx++];
+      } else if (placeholder.startsWith('$')) {
         const pNum = parseInt(placeholder.slice(1), 10) - 1;
         row[col] = params[pNum];
       } else if (placeholder.toLowerCase() === 'false') {
@@ -297,17 +303,36 @@ function executeInMemoryQuery<T>(text: string, params: readonly unknown[]): T[] 
     return deleted as unknown as T[];
   }
 
-  // 5. SELECT statements
-  const selectMatch = /^SELECT\s+(.+?)\s+FROM\s+([a-z_]+)(?:\s+WHERE\s+(.+?))?(?:\s+ORDER BY\s+(.+?))?(?:\s+LIMIT\s+(\d+))?$/i.exec(normalized);
+  // 5. SELECT statements (supports optional single JOIN)
+  const selectMatch = /^SELECT\s+(.+?)\s+FROM\s+([a-z_]+)(?:\s+([a-z0-9_]+))?(?:\s+JOIN\s+([a-z_]+)\s+([a-z0-9_]+)\s+ON\s+([a-z0-9_.]+)\s*=\s*([a-z0-9_.]+))?(?:\s+WHERE\s+(.+?))?(?:\s+ORDER BY\s+(.+?))?(?:\s+LIMIT\s+(\d+))?$/i.exec(normalized);
   if (selectMatch) {
     const colsStr = selectMatch[1]!;
     const tableName = selectMatch[2]!.toLowerCase() as keyof MemoryStoreData;
-    const whereClause = selectMatch[3];
-    const orderByClause = selectMatch[4];
-    const limitClause = selectMatch[5];
+    const joinTableName = selectMatch[4]?.toLowerCase() as keyof MemoryStoreData | undefined;
+    const joinLeftCol = selectMatch[6]?.split('.').pop();
+    const joinRightCol = selectMatch[7]?.split('.').pop();
+    const whereClause = selectMatch[8];
+    const orderByClause = selectMatch[9];
+    const limitClause = selectMatch[10];
 
     const table = memoryStore[tableName] || {};
-    let rows = Object.values(table);
+    let rows: any[] = Object.values(table);
+
+    // Apply JOIN if present
+    if (joinTableName && joinLeftCol && joinRightCol) {
+      const joinTable = memoryStore[joinTableName] || {};
+      const joined: any[] = [];
+      for (const pRow of rows) {
+        const matchVal = pRow[joinLeftCol] ?? pRow[joinRightCol];
+        const matchJoin = Object.values(joinTable).find(
+          (jRow) => jRow[joinRightCol] === matchVal || jRow[joinLeftCol] === matchVal
+        );
+        if (matchJoin) {
+          joined.push({ ...matchJoin, ...pRow });
+        }
+      }
+      rows = joined;
+    }
 
     // Apply WHERE
     if (whereClause) {
@@ -357,15 +382,26 @@ function evalWhere(whereClause: string, row: Record<string, any>, params: readon
   const conditions = whereClause.split(/\s+AND\s+/i);
   for (const cond of conditions) {
     const trimmed = cond.trim();
-    // match: column (= | != | > | < | >= | <= | IS) value
-    const match = /^([a-z0-9_]+)\s*(=|!=|<>|IS NOT|IS)\s*(.+)$/i.exec(trimmed);
+    // match: column (= | != | <> | IS NOT | IS | IN) value
+    const match = /^([a-z0-9_.]+)\s*(=|!=|<>|IS NOT|IS|IN)\s*(.+)$/i.exec(trimmed);
     if (!match) continue;
 
-    const col = match[1]!.toLowerCase();
+    const rawCol = match[1]!.toLowerCase();
+    const col = rawCol.includes('.') ? rawCol.split('.').pop()! : rawCol;
     const op = match[2]!.toUpperCase();
     const right = match[3]!.trim();
 
     let targetVal: any;
+    if (op === 'IN') {
+      const inValues = right
+        .replace(/[()]/g, '')
+        .split(',')
+        .map((v) => v.trim().replace(/^['"]|['"]$/g, ''));
+      const rowVal = row[col];
+      if (!inValues.includes(String(rowVal))) return false;
+      continue;
+    }
+
     if (right.startsWith('$')) {
       const pNum = parseInt(right.slice(1), 10) - 1;
       targetVal = params[pNum];
@@ -412,9 +448,10 @@ function mapColumns(colsStr: string, row: Record<string, any>): Record<string, a
 
   for (const expr of colExprs) {
     // to_char(col, 'YYYY-MM-DD') AS alias
-    const toCharMatch = /^to_char\(([a-z0-9_]+),\s*[^)]+\)\s+AS\s+([a-z0-9_]+)$/i.exec(expr);
+    const toCharMatch = /^to_char\(([a-z0-9_.]+),\s*[^)]+\)\s+AS\s+([a-z0-9_]+)$/i.exec(expr);
     if (toCharMatch) {
-      const srcCol = toCharMatch[1]!;
+      const rawSrcCol = toCharMatch[1]!;
+      const srcCol = rawSrcCol.includes('.') ? rawSrcCol.split('.').pop()! : rawSrcCol;
       const alias = toCharMatch[2]!;
       const val = row[srcCol];
       res[alias] = val ? String(val).slice(0, 10) : null;
@@ -422,14 +459,17 @@ function mapColumns(colsStr: string, row: Record<string, any>): Record<string, a
     }
 
     // col AS alias
-    const aliasMatch = /^([a-z0-9_]+)\s+AS\s+([a-z0-9_]+)$/i.exec(expr);
+    const aliasMatch = /^([a-z0-9_.]+)\s+AS\s+([a-z0-9_]+)$/i.exec(expr);
     if (aliasMatch) {
-      res[aliasMatch[2]!] = row[aliasMatch[1]!];
+      const rawSrc = aliasMatch[1]!;
+      const srcCol = rawSrc.includes('.') ? rawSrc.split('.').pop()! : rawSrc;
+      res[aliasMatch[2]!] = row[srcCol];
       continue;
     }
 
-    // Plain column
-    res[expr] = row[expr];
+    // Plain column (possibly with table prefix like i.id)
+    const cleanCol = expr.includes('.') ? expr.split('.').pop()! : expr;
+    res[cleanCol] = row[cleanCol];
   }
   return res;
 }

@@ -73,11 +73,18 @@ export async function authRoutes(app: FastifyInstance, deps: ApiDeps): Promise<v
       deps.auditHmacKey,
     );
 
+    const isProduction = process.env.NODE_ENV === 'production';
     reply.setCookie('__Host-tl_session', session.sessionId, {
       path: '/',
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'lax',
+    });
+    reply.setCookie('tl_session', session.sessionId, {
+      path: '/',
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
     });
 
     return reply.send({
@@ -90,17 +97,18 @@ export async function authRoutes(app: FastifyInstance, deps: ApiDeps): Promise<v
 
   // POST /auth/logout
   app.post('/auth/logout', async (request, reply) => {
-    const rawCookie = request.cookies['__Host-tl_session'];
+    const rawCookie = request.cookies['__Host-tl_session'] || request.cookies['tl_session'];
     if (rawCookie) {
       await destroySession(rawCookie, deps.pepper);
     }
     reply.clearCookie('__Host-tl_session', { path: '/' });
+    reply.clearCookie('tl_session', { path: '/' });
     return reply.send({ status: 'ok' });
   });
 
   // GET /auth/session
   app.get('/auth/session', async (request, reply) => {
-    const rawCookie = request.cookies['__Host-tl_session'];
+    const rawCookie = request.cookies['__Host-tl_session'] || request.cookies['tl_session'];
     if (!rawCookie) {
       throw new ApiError(401, 'UNAUTHENTICATED');
     }
