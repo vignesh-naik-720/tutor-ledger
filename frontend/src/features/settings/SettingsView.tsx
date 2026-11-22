@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import type { LedgerSettings, RecurringBill, OneOffExpense } from '../../types';
+import type { LedgerSettings, RecurringBill, OneOffExpense, OwnerProfile } from '../../types';
 import { api } from '../../services/api';
-import { Settings, Shield, Plus, Download, Trash2, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Settings, Shield, Plus, Download, Trash2, RefreshCw, CheckCircle2, User } from 'lucide-react';
 
 interface SettingsViewProps {
   settings: LedgerSettings | null;
@@ -9,6 +9,7 @@ interface SettingsViewProps {
   expenses: OneOffExpense[];
   currencySymbol: string;
   onRefresh: () => void;
+  owner?: OwnerProfile | null;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -17,6 +18,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   expenses,
   currencySymbol,
   onRefresh,
+  owner,
 }) => {
   const [minBalance, setMinBalance] = useState<string>(
     settings ? String(settings.minimum_balance_minor / 100) : '10000',
@@ -124,6 +126,50 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       {notice && (
         <div style={{ padding: '10px 14px', background: 'var(--badge-emerald-bg)', color: 'var(--badge-emerald-text)', border: '1px solid rgba(5, 150, 105, 0.2)', borderRadius: '8px', fontSize: '0.85rem' }}>
           {notice}
+        </div>
+      )}
+
+      {/* Tutor Profile Card */}
+      {owner && (
+        <div className="bento-card">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+            <div
+              style={{
+                width: '42px',
+                height: '42px',
+                borderRadius: '12px',
+                background: 'var(--brand-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#ffffff',
+                fontWeight: 800,
+                fontSize: '1.1rem',
+              }}
+            >
+              {owner.name ? owner.name.slice(0, 1).toUpperCase() : 'T'}
+            </div>
+            <div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>{owner.name}</h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Tutor Profile & Authentication</p>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+            <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.04em' }}>Registered Email</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 600, marginTop: '2px', wordBreak: 'break-all' }}>{owner.email}</div>
+            </div>
+            {owner.dob && (
+              <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.04em' }}>Date of Birth</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 600, marginTop: '2px' }}>{owner.dob}</div>
+              </div>
+            )}
+            <div style={{ padding: '12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.04em' }}>Ledger Currency</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 600, marginTop: '2px' }}>{settings?.currency_code || 'INR'} ({currencySymbol})</div>
+            </div>
+          </div>
         </div>
       )}
 

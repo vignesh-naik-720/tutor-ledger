@@ -27,6 +27,7 @@ interface DashboardViewProps {
   chaseItems?: ChaseTodayItem[];
   onNavigate: (tab: string, targetId?: string) => void;
   currencySymbol: string;
+  onRefresh?: () => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
@@ -37,6 +38,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   chaseItems = [],
   onNavigate,
   currencySymbol,
+  onRefresh,
 }) => {
   const totalOutstanding = whoOwes ? whoOwes.total_outstanding_minor / 100 : 0;
   const familiesOwingCount = whoOwes ? whoOwes.families_owing_count : 0;

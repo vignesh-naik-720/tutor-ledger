@@ -53,20 +53,28 @@ export function describeInternalError(err: unknown): Record<string, unknown> {
 
 /** Fastify global error handler matching the spec error envelope */
 export function errorHandler(error: any, _request: any, reply: any): void {
+  console.error('Unhandled API Error:', error);
   const statusCode = typeof error.statusCode === 'number' ? error.statusCode : 500;
   const code: ErrorCode =
     error.code && error.code in ERROR_MESSAGES
       ? (error.code as ErrorCode)
-      : statusCode === 404
-        ? 'NOT_FOUND'
-        : statusCode === 401
-          ? 'UNAUTHENTICATED'
-          : statusCode === 403
-            ? 'FORBIDDEN'
-            : statusCode === 409
-              ? 'CONFLICT'
-              : 'INTERNAL';
+      : statusCode === 400
+        ? 'VALIDATION_FAILED'
+        : statusCode === 404
+          ? 'NOT_FOUND'
+          : statusCode === 401
+            ? 'UNAUTHENTICATED'
+            : statusCode === 403
+              ? 'FORBIDDEN'
+              : statusCode === 409
+                ? 'CONFLICT'
+                : 'INTERNAL';
 
   const fields = Array.isArray(error.fields) ? error.fields : [];
-  reply.code(statusCode).send(buildErrorEnvelope(code, fields));
+  const envelope = buildErrorEnvelope(code, fields);
+  // Propagate informative message on client errors (400, 401, 409)
+  if (error.message && (statusCode === 400 || statusCode === 401 || statusCode === 409)) {
+    envelope.error.message = error.message;
+  }
+  reply.code(statusCode).send(envelope);
 }

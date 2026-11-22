@@ -12,6 +12,7 @@ import type {
   RecurringBill,
   OneOffExpense,
   LedgerSettings,
+  OwnerProfile,
 } from './types';
 
 // Views
@@ -65,6 +66,7 @@ export default function App() {
   const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
 
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [currentOwner, setCurrentOwner] = useState<OwnerProfile | null>(null);
   const [ownerExists, setOwnerExists] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | undefined>(undefined);
@@ -94,7 +96,10 @@ export default function App() {
         setAuthenticated(false);
         return;
       }
-      await api.getSession();
+      const sessRes = await api.getSession();
+      if (sessRes.owner) {
+        setCurrentOwner(sessRes.owner);
+      }
       setAuthenticated(true);
     } catch {
       setAuthenticated(false);
@@ -118,7 +123,12 @@ export default function App() {
         expRes,
         settRes,
       ] = await Promise.all([
-        api.getFamilies().catch(() => ({ families: [], currency_code: 'INR' })),
+        api.getFamilies().catch((err) => {
+          if (err.status === 401) {
+            setAuthenticated(false);
+          }
+          return { families: [], currency_code: 'INR' };
+        }),
         api.getInvoices().catch(() => ({ invoices: [], currency_code: 'INR' })),
         api.getChaseToday().catch(() => ({ chase_today: [], total_count: 0, total_amount_minor: 0 })),
         api.getWhoOwes(showAllWhoOwes).catch(() => null),
@@ -158,8 +168,14 @@ export default function App() {
   }, [authenticated, loadData]);
 
   const handleLogout = async () => {
-    await api.logout();
-    setAuthenticated(false);
+    try {
+      await api.logout();
+    } catch (e) {
+      console.warn('Logout notice:', e);
+    } finally {
+      setCurrentOwner(null);
+      setAuthenticated(false);
+    }
   };
 
   const currencySymbol = settings?.currency_code === 'GBP' ? '£' : settings?.currency_code === 'USD' ? '$' : '₹';
@@ -209,7 +225,15 @@ export default function App() {
   }
 
   if (!authenticated) {
-    return <AuthModal onAuthenticated={() => setAuthenticated(true)} ownerExists={ownerExists} />;
+    return (
+      <AuthModal
+        onAuthenticated={(owner) => {
+          if (owner) setCurrentOwner(owner);
+          setAuthenticated(true);
+        }}
+        ownerExists={ownerExists}
+      />
+    );
   }
 
   const overdueCount = chaseItems.length;
@@ -313,6 +337,44 @@ export default function App() {
               <RefreshCw size={14} className={loading ? 'spin' : ''} />
               {loading ? 'Refreshing...' : 'Sync'}
             </button>
+
+            {currentOwner && (
+              <div
+                className="desktop-nav-tabs"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '4px 10px',
+                  background: 'var(--bg-secondary)',
+                  borderRadius: '8px',
+                  border: '1px solid var(--border-color)',
+                  marginRight: '2px',
+                }}
+                title={`Signed in as ${currentOwner.name} (${currentOwner.email})`}
+              >
+                <div
+                  style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '6px',
+                    background: 'var(--brand-primary)',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  {currentOwner.name ? currentOwner.name[0].toUpperCase() : 'T'}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', lineHeight: 1.15 }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-main)' }}>{currentOwner.name}</span>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{currentOwner.email}</span>
+                </div>
+              </div>
+            )}
 
             <button
               className="desktop-nav-tabs"
@@ -548,6 +610,7 @@ export default function App() {
             chaseItems={chaseItems}
             onNavigate={navigateTo}
             currencySymbol={currencySymbol}
+            onRefresh={loadData}
           />
         )}
 
@@ -628,6 +691,7 @@ export default function App() {
             expenses={expenses}
             currencySymbol={currencySymbol}
             onRefresh={loadData}
+            owner={currentOwner}
           />
         )}
       </main>

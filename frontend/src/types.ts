@@ -173,3 +173,10 @@ export interface LedgerSettings {
   opening_balance_minor: number;
   is_sample_data: boolean;
 }
+
+export interface OwnerProfile {
+  id: string;
+  name: string;
+  email: string;
+  dob?: string | null;
+}

@@ -50,9 +50,9 @@ Data is stored in PostgreSQL or in a local JSON file (see [Data persistence](#10
    ```
    Run it once per 64-hex key.
 
-5. **Replace every placeholder key** in `.env` before any use beyond your own machine. The example file contains development values.
+5. The `.env.example` file contains empty placeholders so it is safe to commit to public version control without leaking credentials. When you copy it to `.env` (which is git-ignored), populate your own 64-hex keys or use generated development keys.
 
-**Note:** The frontend's one-click demo sign-in uses a hardcoded setup secret. If you change `TL_SETUP_SECRET`, the one-click demo first-run path will fail. See [Troubleshooting](#13-troubleshooting).
+**Note:** The frontend's one-click demo sign-in uses the development setup secret `TUTOR_LEDGER_DEV_SECRET_2026`. If you change `TL_SETUP_SECRET`, use your custom secret in the manual setup form. See [Troubleshooting](#13-troubleshooting).
 
 ## 4. Method 1: Docker Compose
 

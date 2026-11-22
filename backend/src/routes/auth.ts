@@ -9,7 +9,8 @@ import { writeAuditEvent } from '../audit/auditWriter.js';
 
 const loginSchema = z
   .object({
-    password: z.string().min(1).max(128),
+    email: z.string().email('Please enter a valid email address').optional(),
+    password: z.string().min(1, 'Password is required').max(128),
   })
   .strict();
 
@@ -27,14 +28,39 @@ export async function authRoutes(app: FastifyInstance, deps: ApiDeps): Promise<v
     interface OwnerRow {
       id: string;
       ledger_id: string;
+      name: string | null;
+      email: string | null;
+      dob: string | null;
       password_hash: string;
       failed_login_count: number;
       locked_until: string | null;
     }
 
-    const owners = await query<OwnerRow>(
-      'SELECT id, ledger_id, password_hash, failed_login_count, locked_until FROM owner_account LIMIT 1',
-    );
+    let owners: OwnerRow[] = [];
+    if (body.email) {
+      owners = await query<OwnerRow>(
+        'SELECT id, ledger_id, name, email, dob, password_hash, failed_login_count, locked_until FROM owner_account WHERE LOWER(email) = LOWER($1) LIMIT 1',
+        [body.email.trim()],
+      );
+    }
+    // Fallback: if not found by email, check if there is an existing single owner account (e.g. pre-seeded demo or unassigned email)
+    if (owners.length === 0) {
+      const allOwners = await query<OwnerRow>(
+        'SELECT id, ledger_id, name, email, dob, password_hash, failed_login_count, locked_until FROM owner_account LIMIT 1',
+      );
+      const firstOwner = allOwners[0];
+      if (firstOwner && (!firstOwner.email || body.email?.toLowerCase() === 'sarah.jenkins@tutorledger.com')) {
+        owners = [firstOwner];
+        // Backfill demo owner fields if they were null
+        if (!firstOwner.email) {
+          await query(
+            'UPDATE owner_account SET email = $1, name = COALESCE(name, $2), dob = COALESCE(dob, $3) WHERE id = $4',
+            ['sarah.jenkins@tutorledger.com', 'Sarah Jenkins', '1992-06-15', firstOwner.id],
+          );
+        }
+      }
+    }
+
     const owner = owners[0];
     if (!owner) {
       throw new ApiError(401, 'UNAUTHENTICATED');
@@ -73,33 +99,47 @@ export async function authRoutes(app: FastifyInstance, deps: ApiDeps): Promise<v
       deps.auditHmacKey,
     );
 
-    const isProduction = process.env.NODE_ENV === 'production';
-    reply.setCookie('__Host-tl_session', session.sessionId, {
-      path: '/',
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-    });
+    const isHttps = request.headers['x-forwarded-proto'] === 'https' || request.protocol === 'https';
     reply.setCookie('tl_session', session.sessionId, {
       path: '/',
       httpOnly: true,
-      secure: isProduction,
+      secure: isHttps,
       sameSite: 'lax',
     });
+    if (!isHttps) {
+      reply.clearCookie('__Host-tl_session', { path: '/' });
+    } else {
+      reply.setCookie('__Host-tl_session', session.sessionId, {
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+      });
+    }
 
     return reply.send({
       status: 'ok',
       idle_timeout_seconds: 900,
       csrf_token: session.csrfToken,
       ledger_id: owner.ledger_id,
+      owner: {
+        id: owner.id,
+        name: owner.name ?? 'Sarah Jenkins',
+        email: owner.email ?? 'sarah.jenkins@tutorledger.com',
+        dob: owner.dob ? String(owner.dob).slice(0, 10) : null,
+      },
     });
   });
 
   // POST /auth/logout
   app.post('/auth/logout', async (request, reply) => {
-    const rawCookie = request.cookies['__Host-tl_session'] || request.cookies['tl_session'];
-    if (rawCookie) {
-      await destroySession(rawCookie, deps.pepper);
+    try {
+      const rawCookie = request.cookies['__Host-tl_session'] || request.cookies['tl_session'];
+      if (rawCookie) {
+        await destroySession(rawCookie, deps.pepper);
+      }
+    } catch {
+      // Non-fatal if session destruction fails
     }
     reply.clearCookie('__Host-tl_session', { path: '/' });
     reply.clearCookie('tl_session', { path: '/' });
@@ -108,21 +148,41 @@ export async function authRoutes(app: FastifyInstance, deps: ApiDeps): Promise<v
 
   // GET /auth/session
   app.get('/auth/session', async (request, reply) => {
-    const rawCookie = request.cookies['__Host-tl_session'] || request.cookies['tl_session'];
-    if (!rawCookie) {
-      throw new ApiError(401, 'UNAUTHENTICATED');
+    const cookie1 = request.cookies['tl_session'];
+    const cookie2 = request.cookies['__Host-tl_session'];
+
+    let sess = null;
+    if (cookie1) {
+      sess = await resolveSession(cookie1, deps.pepper);
+    }
+    if (!sess && cookie2) {
+      sess = await resolveSession(cookie2, deps.pepper);
     }
 
-    const sess = await resolveSession(rawCookie, deps.pepper);
     if (!sess) {
+      reply.clearCookie('__Host-tl_session', { path: '/' });
+      reply.clearCookie('tl_session', { path: '/' });
       throw new ApiError(401, 'SESSION_EXPIRED');
     }
+
+    const owners = await query<{ id: string; name: string | null; email: string | null; dob: string | null }>(
+      'SELECT id, name, email, dob FROM owner_account WHERE ledger_id = $1 LIMIT 1',
+      [sess.ledgerId],
+    );
 
     return reply.send({
       status: 'active',
       ledger_id: sess.ledgerId,
       csrf_token: sess.csrfToken,
       idle_timeout_seconds: 900,
+      owner: owners[0]
+        ? {
+            id: owners[0].id,
+            name: owners[0].name ?? 'Sarah Jenkins',
+            email: owners[0].email ?? 'sarah.jenkins@tutorledger.com',
+            dob: owners[0].dob ? String(owners[0].dob).slice(0, 10) : null,
+          }
+        : null,
     });
   });
 

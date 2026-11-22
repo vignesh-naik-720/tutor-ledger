@@ -53,6 +53,16 @@ export function buildApp(opts: AppOptions): FastifyInstance {
   // Cookie plugin
   app.register(fastifyCookie);
 
+  // Support application/json with safe empty body handling
+  app.addContentTypeParser('application/json', { parseAs: 'string' }, (_req, body, done) => {
+    try {
+      const str = ((body as string) || '').trim();
+      done(null, str ? JSON.parse(str) : {});
+    } catch (err: any) {
+      done(err, undefined);
+    }
+  });
+
   // Support application/x-www-form-urlencoded (Twilio webhooks)
   app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' }, (_req, body, done) => {
     try {
@@ -78,21 +88,28 @@ export function buildApp(opts: AppOptions): FastifyInstance {
       url.startsWith('/api/v1/setup/status') ||
       url.startsWith('/api/v1/setup/owner') ||
       url.startsWith('/api/v1/auth/login') ||
+      url.startsWith('/api/v1/auth/signup') ||
+      url.startsWith('/api/v1/auth/logout') ||
       url.startsWith('/api/v1/whatsapp/webhook') ||
       request.method === 'OPTIONS'
     ) {
       return;
     }
 
-    const rawCookie = request.cookies['__Host-tl_session'] || request.cookies['tl_session'];
-    if (!rawCookie) {
-      return reply.code(401).send({
-        error: { code: 'UNAUTHENTICATED', message: 'Authentication required' },
-      });
+    const cookie1 = request.cookies['tl_session'];
+    const cookie2 = request.cookies['__Host-tl_session'];
+
+    let sess = null;
+    if (cookie1) {
+      sess = await resolveSession(cookie1, opts.deps.pepper);
+    }
+    if (!sess && cookie2) {
+      sess = await resolveSession(cookie2, opts.deps.pepper);
     }
 
-    const sess = await resolveSession(rawCookie, opts.deps.pepper);
     if (!sess) {
+      reply.clearCookie('__Host-tl_session', { path: '/' });
+      reply.clearCookie('tl_session', { path: '/' });
       return reply.code(401).send({
         error: { code: 'SESSION_EXPIRED', message: 'Session expired' },
       });

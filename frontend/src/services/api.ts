@@ -10,6 +10,7 @@ import type {
   RecurringBill,
   OneOffExpense,
   LedgerSettings,
+  OwnerProfile,
 } from '../types';
 
 let cachedCsrfToken: string | null = null;
@@ -29,9 +30,12 @@ export async function getCsrfToken(): Promise<string> {
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...(options.headers as Record<string, string>),
   };
+
+  if (options.body && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(options.method?.toUpperCase() || '')) {
     const csrf = await getCsrfToken();
@@ -72,29 +76,69 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const api = {
   // Auth & Setup
-  getSetupStatus: () => request<{ owner_exists: boolean; is_sample_data: boolean; currency_code: string }>('/setup/status'),
-  setupOwner: (data: { setup_secret: string; password: string; currency_code?: string; minimum_balance_minor?: number }) =>
-    request<{ status: string; ledger_id: string; csrf_token: string }>('/setup/owner', { method: 'POST', body: JSON.stringify(data) }),
-  login: (password: string) =>
-    request<{ status: string; csrf_token: string; ledger_id: string }>('/auth/login', {
+  getSetupStatus: () =>
+    request<{
+      owner_exists: boolean;
+      is_sample_data: boolean;
+      currency_code: string;
+      default_email?: string;
+      default_name?: string;
+    }>('/setup/status'),
+  setupOwner: (data: {
+    setup_secret?: string;
+    name?: string;
+    email?: string;
+    dob?: string;
+    password: string;
+    currency_code?: string;
+    minimum_balance_minor?: number;
+    opening_balance_minor?: number;
+  }) =>
+    request<{ status: string; ledger_id: string; csrf_token: string; owner?: OwnerProfile }>('/setup/owner', {
       method: 'POST',
-      body: JSON.stringify({ password }),
+      body: JSON.stringify(data),
+    }),
+  signup: (data: {
+    name: string;
+    email: string;
+    dob?: string;
+    password: string;
+    currency_code?: string;
+    minimum_balance_minor?: number;
+    opening_balance_minor?: number;
+    load_sample_data?: boolean;
+  }) =>
+    request<{ status: string; ledger_id: string; csrf_token: string; owner: OwnerProfile }>('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }).then((res) => {
+      cachedCsrfToken = res.csrf_token;
+      return res;
+    }),
+  login: (credentials: { email?: string; password: string } | string) =>
+    request<{ status: string; csrf_token: string; ledger_id: string; owner?: OwnerProfile }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(typeof credentials === 'string' ? { password: credentials } : credentials),
     }).then((res) => {
       cachedCsrfToken = res.csrf_token;
       return res;
     }),
   logout: () =>
-    request<{ status: string }>('/auth/logout', { method: 'POST' }).then((res) => {
+    request<{ status: string }>('/auth/logout', { method: 'POST', body: '{}' }).then((res) => {
       cachedCsrfToken = null;
       return res;
     }),
   getSession: () =>
-    request<{ status: string; ledger_id: string; csrf_token: string; idle_timeout_seconds: number }>('/auth/session').then(
-      (res) => {
-        cachedCsrfToken = res.csrf_token;
-        return res;
-      },
-    ),
+    request<{
+      status: string;
+      ledger_id: string;
+      csrf_token: string;
+      idle_timeout_seconds: number;
+      owner?: OwnerProfile;
+    }>('/auth/session').then((res) => {
+      cachedCsrfToken = res.csrf_token;
+      return res;
+    }),
   loadSampleData: () => request<{ status: string; familiesCount: number; invoicesCount: number }>('/setup/sample-data', { method: 'POST' }),
   removeSampleData: () => request<{ status: string }>('/setup/sample-data', { method: 'DELETE' }),
 

@@ -96,11 +96,18 @@ export function getPool(connectionString?: string): PgPool | null {
     return null;
   }
   if (!pool) {
+    const isLocal =
+      connectionString.includes('localhost') ||
+      connectionString.includes('127.0.0.1') ||
+      connectionString.includes('postgres') ||
+      connectionString.includes('@db:') ||
+      connectionString.includes('@postgres:') ||
+      !connectionString.includes('sslmode=require');
     pool = new Pool({
       connectionString,
-      ssl: connectionString.includes('localhost') || connectionString.includes('127.0.0.1') ? false : { rejectUnauthorized: false },
+      ssl: isLocal ? false : { rejectUnauthorized: false },
       max: 10,
-      connectionTimeoutMillis: 1500,
+      connectionTimeoutMillis: 5000,
     });
   }
   return pool;
@@ -304,7 +311,7 @@ function executeInMemoryQuery<T>(text: string, params: readonly unknown[]): T[] 
   }
 
   // 5. SELECT statements (supports optional single JOIN)
-  const selectMatch = /^SELECT\s+(.+?)\s+FROM\s+([a-z_]+)(?:\s+([a-z0-9_]+))?(?:\s+JOIN\s+([a-z_]+)\s+([a-z0-9_]+)\s+ON\s+([a-z0-9_.]+)\s*=\s*([a-z0-9_.]+))?(?:\s+WHERE\s+(.+?))?(?:\s+ORDER BY\s+(.+?))?(?:\s+LIMIT\s+(\d+))?$/i.exec(normalized);
+  const selectMatch = /^SELECT\s+(.+?)\s+FROM\s+([a-z_]+)(?:\s+(?!WHERE|JOIN|ORDER|LIMIT)([a-z0-9_]+))?(?:\s+JOIN\s+([a-z_]+)\s+([a-z0-9_]+)\s+ON\s+([a-z0-9_.]+)\s*=\s*([a-z0-9_.]+))?(?:\s+WHERE\s+(.+?))?(?:\s+ORDER BY\s+(.+?))?(?:\s+LIMIT\s+(\d+))?$/i.exec(normalized);
   if (selectMatch) {
     const colsStr = selectMatch[1]!;
     const tableName = selectMatch[2]!.toLowerCase() as keyof MemoryStoreData;
@@ -383,13 +390,27 @@ function evalWhere(whereClause: string, row: Record<string, any>, params: readon
   for (const cond of conditions) {
     const trimmed = cond.trim();
     // match: column (= | != | <> | IS NOT | IS | IN) value
-    const match = /^([a-z0-9_.]+)\s*(=|!=|<>|IS NOT|IS|IN)\s*(.+)$/i.exec(trimmed);
+    const match = /^([a-z0-9_.()]+)\s*(=|!=|<>|IS NOT|IS|IN)\s*(.+)$/i.exec(trimmed);
     if (!match) continue;
 
-    const rawCol = match[1]!.toLowerCase();
+    let rawCol = match[1]!.toLowerCase();
+    let isColLower = false;
+    const lowerColMatch = /^lower\(([a-z0-9_.]+)\)$/i.exec(rawCol);
+    if (lowerColMatch) {
+      rawCol = lowerColMatch[1]!;
+      isColLower = true;
+    }
+
     const col = rawCol.includes('.') ? rawCol.split('.').pop()! : rawCol;
     const op = match[2]!.toUpperCase();
-    const right = match[3]!.trim();
+    let right = match[3]!.trim();
+
+    let isRightLower = false;
+    const lowerRightMatch = /^lower\((.+)\)$/i.exec(right);
+    if (lowerRightMatch) {
+      right = lowerRightMatch[1]!.trim();
+      isRightLower = true;
+    }
 
     let targetVal: any;
     if (op === 'IN') {
@@ -417,7 +438,9 @@ function evalWhere(whereClause: string, row: Record<string, any>, params: readon
       targetVal = Number(right);
     }
 
-    const rowVal = row[col];
+    let rowVal = row[col];
+    if (isColLower && typeof rowVal === 'string') rowVal = rowVal.toLowerCase();
+    if (isRightLower && typeof targetVal === 'string') targetVal = targetVal.toLowerCase();
 
     // Buffer equality check
     if (Buffer.isBuffer(rowVal) && Buffer.isBuffer(targetVal)) {
