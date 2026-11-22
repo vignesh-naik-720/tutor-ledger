@@ -72,26 +72,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthenticated, ownerExis
 
   return (
     <div className="modal-backdrop">
-      <div className="glass-card" style={{ maxWidth: '440px', width: '100%', border: '1px solid #3b82f6' }}>
+      <div className="bento-card" style={{ maxWidth: '440px', width: '100%', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-dropdown)' }}>
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <div
             style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '16px',
-              background: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
+              width: '52px',
+              height: '52px',
+              borderRadius: '14px',
+              background: 'var(--brand-primary)',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
               marginBottom: '12px',
+              color: '#ffffff',
+              boxShadow: '0 4px 12px rgba(37, 99, 235, 0.25)',
             }}
           >
-            <Lock size={28} color="#ffffff" />
+            <Lock size={26} />
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#f8fafc' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-main)', letterSpacing: '-0.02em' }}>
             {isSetup ? 'Welcome to Tutor Ledger' : 'Sign in to Tutor Ledger'}
           </h2>
-          <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginTop: '4px' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '4px' }}>
             {isSetup
               ? 'WhatsApp-first mobile back office for solo home tutors'
               : 'Enter your owner password to access your financial back office'}
@@ -102,10 +104,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthenticated, ownerExis
           <div
             style={{
               padding: '10px 14px',
-              background: 'rgba(239, 68, 68, 0.15)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
+              background: 'var(--badge-rose-bg)',
+              border: '1px solid rgba(225, 29, 72, 0.25)',
               borderRadius: '8px',
-              color: '#f87171',
+              color: 'var(--badge-rose-text)',
               fontSize: '0.85rem',
               marginBottom: '16px',
             }}
@@ -118,7 +120,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthenticated, ownerExis
           {isSetup && (
             <>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Setup Secret (from .env)
                 </label>
                 <input
@@ -133,7 +135,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthenticated, ownerExis
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                     Currency
                   </label>
                   <select
@@ -147,7 +149,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthenticated, ownerExis
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                     Safety Cushion
                   </label>
                   <input
@@ -163,7 +165,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthenticated, ownerExis
           )}
 
           <div>
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
               Owner Password (at least 12 chars)
             </label>
             <input
@@ -185,16 +187,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onAuthenticated, ownerExis
           <button
             type="button"
             className="btn-secondary"
-            style={{ width: '100%', borderColor: '#10b981', color: '#34d399' }}
+            style={{ width: '100%', borderColor: 'var(--brand-primary-border)', background: 'var(--brand-primary-light)', color: 'var(--brand-primary)', fontWeight: 700 }}
             onClick={handleDemoSignIn}
             disabled={loading}
           >
-            <Sparkles size={16} />
+            <Sparkles size={16} color="var(--brand-primary)" />
             Instant 1-Click Tutor Demo Sign-In
           </button>
         </form>
 
-        <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '0.75rem', color: '#64748b' }}>
+        <div style={{ marginTop: '16px', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           Single owner per ledger • Encrypted at rest • Zero automated message leakage
         </div>
       </div>

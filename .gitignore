@@ -45,6 +45,8 @@ out/
 # 4. Local Database, Session Stores & Runtime State
 # ------------------------------------------------------------------------------
 backend/data/*.json
+backend/data/pgdata/
+backend/data/**
 !backend/data/.gitkeep
 *.sqlite
 *.sqlite3

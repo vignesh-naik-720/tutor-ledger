@@ -21,6 +21,7 @@ import { billRoutes } from './routes/bills.js';
 import { alertRoutes } from './routes/alerts.js';
 import { aiRoutes } from './routes/ai.js';
 import { settingsRoutes } from './routes/settings.js';
+import { whatsappRoutes } from './routes/whatsapp.js';
 
 export interface AppOptions {
   deps: ApiDeps;
@@ -52,6 +53,20 @@ export function buildApp(opts: AppOptions): FastifyInstance {
   // Cookie plugin
   app.register(fastifyCookie);
 
+  // Support application/x-www-form-urlencoded (Twilio webhooks)
+  app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' }, (_req, body, done) => {
+    try {
+      const params = new URLSearchParams(body as string);
+      const result: Record<string, string> = {};
+      for (const [k, v] of params.entries()) {
+        result[k] = v;
+      }
+      done(null, result);
+    } catch (err: any) {
+      done(err, undefined);
+    }
+  });
+
   // Session & Ledger Scoping Hook
   // Resolves the session from cookie __Host-tl_session and assigns request.ledgerId
   app.addHook('onRequest', async (request, reply) => {
@@ -62,6 +77,7 @@ export function buildApp(opts: AppOptions): FastifyInstance {
       url.startsWith('/api/v1/setup/status') ||
       url.startsWith('/api/v1/setup/owner') ||
       url.startsWith('/api/v1/auth/login') ||
+      url.startsWith('/api/v1/whatsapp/webhook') ||
       request.method === 'OPTIONS'
     ) {
       return;
@@ -101,6 +117,7 @@ export function buildApp(opts: AppOptions): FastifyInstance {
       await alertRoutes(v1, opts.deps);
       await aiRoutes(v1, opts.deps);
       await settingsRoutes(v1, opts.deps);
+      await whatsappRoutes(v1, opts.deps);
     },
     { prefix: '/api/v1' },
   );

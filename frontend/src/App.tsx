@@ -33,14 +33,32 @@ import {
   TrendingUp,
   Sliders,
   Sparkles,
+  Smartphone,
   FileText,
   UserCheck,
   Settings,
   LogOut,
   RefreshCw,
+  Sun,
+  Moon,
+  Menu,
+  X,
 } from 'lucide-react';
 
 export default function App() {
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('tutor_ledger_theme') as 'light' | 'dark') || 'light';
+  });
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('tutor_ledger_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [ownerExists, setOwnerExists] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -150,7 +168,7 @@ export default function App() {
 
   if (authenticated === null) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: '#94a3b8' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', color: 'var(--text-muted)' }}>
         Starting Tutor Ledger...
       </div>
     );
@@ -167,13 +185,14 @@ export default function App() {
       {/* Top Application Navbar */}
       <header
         style={{
-          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-          background: 'rgba(15, 23, 42, 0.95)',
+          borderBottom: '1px solid var(--border-color)',
+          background: 'var(--nav-bg)',
           backdropFilter: 'blur(12px)',
           position: 'sticky',
           top: 0,
           zIndex: 40,
           padding: '12px 24px',
+          transition: 'background 0.2s ease, border-color 0.2s ease',
         }}
       >
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -183,28 +202,49 @@ export default function App() {
                 width: '38px',
                 height: '38px',
                 borderRadius: '10px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                background: 'var(--brand-primary)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                color: '#ffffff',
+                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.25)',
               }}
             >
-              <FileText size={22} color="#ffffff" />
+              <FileText size={20} />
             </div>
             <div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.02em', color: '#ffffff' }}>
+              <div style={{ fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--text-main)' }}>
                 Tutor Ledger
               </div>
-              <div style={{ fontSize: '0.7rem', color: '#34d399', fontWeight: 600, textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '0.68rem', color: 'var(--brand-primary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                 WhatsApp-First Back Office
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Theme Toggle Button */}
             <button
               className="btn-secondary"
+              style={{ padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+              onClick={toggleTheme}
+              title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+            >
+              {theme === 'light' ? (
+                <>
+                  <Moon size={14} color="var(--brand-primary)" />
+                  <span style={{ fontWeight: 600 }}>Dark</span>
+                </>
+              ) : (
+                <>
+                  <Sun size={14} color="var(--brand-amber)" />
+                  <span style={{ fontWeight: 600 }}>Light</span>
+                </>
+              )}
+            </button>
+
+            <button
+              className="btn-secondary desktop-nav-tabs"
               style={{ padding: '6px 12px', fontSize: '0.8rem' }}
               onClick={loadData}
               title="Refresh ledger records"
@@ -214,11 +254,12 @@ export default function App() {
             </button>
 
             <button
+              className="desktop-nav-tabs"
               onClick={handleLogout}
               style={{
                 background: 'none',
-                border: '1px solid #334155',
-                color: '#94a3b8',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-muted)',
                 borderRadius: '8px',
                 padding: '6px 12px',
                 display: 'flex',
@@ -232,12 +273,150 @@ export default function App() {
               <LogOut size={14} />
               Sign Out
             </button>
+
+            {/* Mobile Hamburger Menu Toggle Button */}
+            <button
+              className="btn-secondary mobile-menu-btn"
+              style={{ padding: '8px', display: 'none', alignItems: 'center', justifyContent: 'center' }}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Main Navigation Tabs */}
-      <div style={{ borderBottom: '1px solid #1e293b', background: '#0b0f19', padding: '0 24px', overflowX: 'auto' }}>
+      {/* Mobile Drawer Overlay */}
+      {mobileMenuOpen && (
+        <div className="mobile-drawer-overlay" onClick={() => setMobileMenuOpen(false)} />
+      )}
+
+      {/* Mobile Navigation Drawer */}
+      <aside className={`mobile-nav-drawer ${mobileMenuOpen ? 'open' : ''}`}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '12px', borderBottom: '1px solid var(--border-color)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+              <FileText size={18} />
+            </div>
+            <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-main)' }}>Tutor Ledger</span>
+          </div>
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '6px' }}
+            aria-label="Close menu"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Tab Links inside mobile drawer */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, overflowY: 'auto' }}>
+          {[
+            { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+            { id: 'chase', label: 'Chase Today', icon: Zap, badge: overdueCount > 0 ? overdueCount : undefined },
+            { id: 'who_owes', label: 'Who Owes Me', icon: Users },
+            { id: 'forecast', label: '13-Wk Cash Forecast', icon: TrendingUp },
+            { id: 'scenarios', label: 'What-If Scenarios', icon: Sliders },
+            { id: 'ai', label: 'WhatsApp Bot Hub', icon: Smartphone, highlight: true },
+            { id: 'invoices', label: 'Invoices & Payments', icon: FileText },
+            { id: 'families', label: 'Students / Families', icon: UserCheck },
+            { id: 'settings', label: 'Settings', icon: Settings },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  setSelectedInvoiceId(undefined);
+                  setMobileMenuOpen(false);
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '12px 14px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: isActive ? 'var(--brand-primary-light)' : 'transparent',
+                  color: isActive ? 'var(--brand-primary)' : 'var(--text-main)',
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.15s ease',
+                  minHeight: '44px',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Icon size={18} color={isActive ? 'var(--brand-primary)' : 'var(--text-muted)'} />
+                  <span>{tab.label}</span>
+                </div>
+                {tab.badge !== undefined && (
+                  <span
+                    style={{
+                      background: 'var(--brand-rose)',
+                      color: '#ffffff',
+                      fontSize: '0.7rem',
+                      fontWeight: 800,
+                      padding: '2px 7px',
+                      borderRadius: '999px',
+                    }}
+                  >
+                    {tab.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mobile Drawer Footer Actions */}
+        <div style={{ paddingTop: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <button
+            className="btn-secondary"
+            style={{ width: '100%', minHeight: '42px', padding: '10px', fontSize: '0.85rem' }}
+            onClick={() => {
+              loadData();
+              setMobileMenuOpen(false);
+            }}
+          >
+            <RefreshCw size={16} className={loading ? 'spin' : ''} />
+            Sync Ledger Records
+          </button>
+
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              handleLogout();
+            }}
+            style={{
+              width: '100%',
+              minHeight: '42px',
+              padding: '10px',
+              borderRadius: '10px',
+              border: '1px solid var(--border-color)',
+              background: 'transparent',
+              color: 'var(--brand-rose)',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+            }}
+          >
+            <LogOut size={16} />
+            Sign Out
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Navigation Tabs (Desktop) */}
+      <div className="desktop-nav-tabs" style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-surface)', padding: '0 24px', overflowX: 'auto', transition: 'background 0.2s ease' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', gap: '4px' }}>
           {[
             { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -245,7 +424,7 @@ export default function App() {
             { id: 'who_owes', label: 'Who Owes Me', icon: Users },
             { id: 'forecast', label: '13-Wk Cash Forecast', icon: TrendingUp },
             { id: 'scenarios', label: 'What-If Scenarios', icon: Sliders },
-            { id: 'ai', label: 'AI Copilot & Parser', icon: Sparkles, highlight: true },
+            { id: 'ai', label: 'WhatsApp Bot Hub', icon: Smartphone, highlight: true },
             { id: 'invoices', label: 'Invoices & Payments', icon: FileText },
             { id: 'families', label: 'Students / Families', icon: UserCheck },
             { id: 'settings', label: 'Settings', icon: Settings },
@@ -263,13 +442,13 @@ export default function App() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
-                  padding: '14px 16px',
+                  padding: '13px 16px',
                   background: 'none',
                   border: 'none',
-                  borderBottom: isActive ? '2px solid #10b981' : '2px solid transparent',
-                  color: isActive ? '#34d399' : tab.highlight ? '#818cf8' : '#94a3b8',
-                  fontWeight: isActive ? 700 : 600,
-                  fontSize: '0.875rem',
+                  borderBottom: isActive ? '2px solid var(--brand-primary)' : '2px solid transparent',
+                  color: isActive ? 'var(--brand-primary)' : tab.highlight ? 'var(--brand-sky)' : 'var(--text-muted)',
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: '0.85rem',
                   cursor: 'pointer',
                   whiteSpace: 'nowrap',
                   transition: 'all 0.15s ease',
@@ -280,7 +459,7 @@ export default function App() {
                 {tab.badge !== undefined && (
                   <span
                     style={{
-                      background: '#ef4444',
+                      background: 'var(--brand-rose)',
                       color: '#ffffff',
                       fontSize: '0.7rem',
                       fontWeight: 800,
@@ -298,12 +477,14 @@ export default function App() {
       </div>
 
       {/* Main Content Area */}
-      <main style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '28px 24px', flex: 1 }}>
+      <main style={{ maxWidth: '1280px', width: '100%', margin: '0 auto', padding: '24px 24px', flex: 1 }}>
         {activeTab === 'dashboard' && (
           <DashboardView
             whoOwes={whoOwesData}
             alerts={alerts}
             cashFlowInsights={cashFlowInsights}
+            forecast={forecastData}
+            chaseItems={chaseItems}
             onNavigate={navigateTo}
             currencySymbol={currencySymbol}
           />
@@ -391,7 +572,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer style={{ borderTop: '1px solid #1e293b', padding: '16px 24px', textAlign: 'center', fontSize: '0.8rem', color: '#64748b' }}>
+      <footer style={{ borderTop: '1px solid var(--border-color)', padding: '16px 24px', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
         Tutor Ledger • WhatsApp-First Financial Back Office for Home Tutors • Problem Statement 1 (Ace Builders Hackathon 2026)
       </footer>
     </div>

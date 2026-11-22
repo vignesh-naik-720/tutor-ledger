@@ -11,7 +11,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
   const [selectedWeekIdx, setSelectedWeekIdx] = useState<number>(1);
 
   if (!forecast || !forecast.baseline) {
-    return <div style={{ color: '#94a3b8', textAlign: 'center', padding: '40px' }}>Loading 13-week forecast...</div>;
+    return <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '40px' }}>Loading 13-week forecast...</div>;
   }
 
   const { baseline, scenario } = forecast;
@@ -59,8 +59,8 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>📈 13-Week Cash Forecast</h2>
-          <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>📈 13-Week Cash Forecast</h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             Pure deterministic projection built from upcoming fee dates (adjusted by historical family delays) and bills.
           </p>
         </div>
@@ -74,9 +74,9 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
 
       {/* Forecast Status Header */}
       <div
-        className="glass-card"
+        className="bento-card mobile-stack"
         style={{
-          borderLeft: fallsBelowMin ? '4px solid #ef4444' : '4px solid #10b981',
+          borderLeft: fallsBelowMin ? '4px solid var(--brand-rose)' : '4px solid var(--brand-emerald)',
           padding: '16px 20px',
           display: 'flex',
           justifyContent: 'space-between',
@@ -86,28 +86,28 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {fallsBelowMin ? <AlertTriangle size={24} color="#f87171" /> : <TrendingUp size={24} color="#34d399" />}
+          {fallsBelowMin ? <AlertTriangle size={24} color="var(--brand-rose)" /> : <TrendingUp size={24} color="var(--brand-emerald)" />}
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1rem', color: fallsBelowMin ? '#f87171' : '#34d399' }}>
+            <div style={{ fontWeight: 800, fontSize: '1rem', color: fallsBelowMin ? 'var(--brand-rose)' : 'var(--brand-emerald)' }}>
               {fallsBelowMin
                 ? `Projected Cash Dip Below Cushion in Week ${lowestWeek}`
                 : `Healthy Cash Position (Comfortably Above Safety Cushion)`}
             </div>
-            <div style={{ fontSize: '0.825rem', color: '#94a3b8' }}>
-              Lowest projected balance: <strong>{currencySymbol}{lowestCash.toLocaleString('en-IN')}</strong> in Week {lowestWeek}. Safety threshold: {currencySymbol}{minThreshold.toLocaleString('en-IN')}.
+            <div style={{ fontSize: '0.825rem', color: 'var(--text-muted)' }}>
+              Lowest projected balance: <strong style={{ color: 'var(--text-main)' }}>{currencySymbol}{lowestCash.toLocaleString('en-IN')}</strong> in Week {lowestWeek}. Safety threshold: {currencySymbol}{minThreshold.toLocaleString('en-IN')}.
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem' }}>
+        <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '12px', height: '12px', borderRadius: '2px', background: '#10b981' }}></span> Baseline
+            <span style={{ width: '12px', height: '12px', borderRadius: '2px', background: 'var(--brand-primary)' }}></span> Baseline
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '12px', height: '12px', borderRadius: '2px', background: 'rgba(16, 185, 129, 0.2)' }}></span> Best / Worst Band
+            <span style={{ width: '12px', height: '12px', borderRadius: '2px', background: 'var(--brand-primary-light)', border: '1px solid var(--brand-primary-border)' }}></span> Best / Worst Band
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span style={{ width: '12px', height: '2px', background: '#f59e0b' }}></span> Safety Cushion
+            <span style={{ width: '12px', height: '2px', background: 'var(--brand-amber)' }}></span> Safety Cushion
           </span>
         </div>
       </div>
@@ -171,8 +171,8 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
                     cx={cx}
                     cy={cy}
                     r={isSelected ? 6 : isLowest ? 5 : 4}
-                    fill={isLowest ? '#f43f5e' : isSelected ? '#6366f1' : '#10b981'}
-                    stroke="#0f172a"
+                    fill={isLowest ? 'var(--brand-rose)' : isSelected ? 'var(--brand-primary)' : 'var(--brand-emerald)'}
+                    stroke="var(--bg-card)"
                     strokeWidth="2"
                   />
 
@@ -180,7 +180,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
                   <text
                     x={cx}
                     y={height - padY + 16}
-                    fill={isSelected ? '#6366f1' : '#94a3b8'}
+                    fill={isSelected ? 'var(--brand-primary)' : 'var(--text-muted)'}
                     fontSize="10"
                     fontWeight={isSelected ? '700' : '500'}
                     textAnchor="middle"
@@ -190,7 +190,7 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
 
                   {/* Week 7 Dip Callout */}
                   {isWeek7 && (
-                    <text x={cx} y={padY + 12} fill="#818cf8" fontSize="10" fontWeight="700" textAnchor="middle">
+                    <text x={cx} y={padY + 12} fill="var(--brand-primary)" fontSize="10" fontWeight="700" textAnchor="middle">
                       ▼ W7 Dip
                     </text>
                   )}
@@ -206,14 +206,15 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
               key={w.weekIndex}
               onClick={() => setSelectedWeekIdx(w.weekIndex)}
               style={{
-                padding: '6px 12px',
+                padding: '8px 12px',
                 borderRadius: '8px',
                 fontSize: '0.8rem',
-                fontWeight: 600,
-                border: selectedWeekIdx === w.weekIndex ? '1px solid #10b981' : '1px solid #334155',
-                background: selectedWeekIdx === w.weekIndex ? 'rgba(16, 185, 129, 0.2)' : 'rgba(30, 41, 59, 0.6)',
-                color: selectedWeekIdx === w.weekIndex ? '#34d399' : '#94a3b8',
+                fontWeight: 700,
+                border: selectedWeekIdx === w.weekIndex ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)',
+                background: selectedWeekIdx === w.weekIndex ? 'var(--brand-primary-light)' : 'var(--bg-surface-subtle)',
+                color: selectedWeekIdx === w.weekIndex ? 'var(--brand-primary)' : 'var(--text-secondary)',
                 cursor: 'pointer',
+                whiteSpace: 'nowrap',
               }}
             >
               Week {w.weekIndex}
@@ -224,15 +225,15 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
 
       {/* Week Drilldown & Traceability Inspector (FR-034: 100% Traceability) */}
       {selectedWeek && (
-        <div className="glass-card">
+        <div className="bento-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Calendar size={20} color="#34d399" />
-              <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>
+              <Calendar size={20} color="var(--brand-primary)" />
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)' }}>
                 Week {selectedWeek.weekIndex} Breakdown ({selectedWeek.weekStart} to {selectedWeek.weekEnd})
               </h3>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               {selectedWeek.confidence === 'low' && (
                 <span className="badge badge-amber">Thin / No Payment History (Wide Band)</span>
               )}
@@ -241,33 +242,33 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
-            <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '12px', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>OPENING BALANCE</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f8fafc' }}>
+            <div style={{ background: 'var(--bg-surface-subtle)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>OPENING BALANCE</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)' }}>
                 {currencySymbol}
                 {(selectedWeek.openingBalanceMinor / 100).toLocaleString('en-IN')}
               </div>
             </div>
 
-            <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '12px', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.75rem', color: '#34d399' }}>EXPECTED INFLOWS</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#34d399' }}>
+            <div style={{ background: 'var(--bg-surface-subtle)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--brand-emerald)' }}>EXPECTED INFLOWS</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--brand-emerald)' }}>
                 +{currencySymbol}
                 {(selectedWeek.inflowsMinor / 100).toLocaleString('en-IN')}
               </div>
             </div>
 
-            <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '12px', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.75rem', color: '#f87171' }}>EXPECTED OUTFLOWS</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#f87171' }}>
+            <div style={{ background: 'var(--bg-surface-subtle)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--brand-rose)' }}>EXPECTED OUTFLOWS</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--brand-rose)' }}>
                 -{currencySymbol}
                 {(selectedWeek.outflowsMinor / 100).toLocaleString('en-IN')}
               </div>
             </div>
 
-            <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '12px', borderRadius: '8px' }}>
-              <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>CLOSING BALANCE</div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: selectedWeek.belowMinimum ? '#f87171' : '#f8fafc' }}>
+            <div style={{ background: 'var(--bg-surface-subtle)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>CLOSING BALANCE</div>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: selectedWeek.belowMinimum ? 'var(--brand-rose)' : 'var(--text-main)' }}>
                 {currencySymbol}
                 {(selectedWeek.closingBalanceMinor / 100).toLocaleString('en-IN')}
               </div>
@@ -275,34 +276,35 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
           </div>
 
           {/* Traceable Sources List */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
             {/* Inflow Sources */}
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#34d399', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--brand-emerald)', marginBottom: '8px' }}>
                 Inflow Records ({selectedWeek.inflowSources.length})
               </div>
               {selectedWeek.inflowSources.length === 0 ? (
-                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>No invoices expected this week.</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No invoices expected this week.</div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {selectedWeek.inflowSources.map((src, i) => (
                     <div
                       key={i}
                       style={{
-                        padding: '8px 12px',
-                        background: 'rgba(16, 185, 129, 0.06)',
-                        border: '1px solid rgba(16, 185, 129, 0.15)',
-                        borderRadius: '6px',
+                        padding: '10px 12px',
+                        background: 'var(--brand-emerald-light)',
+                        border: '1px solid var(--brand-emerald-border)',
+                        borderRadius: '8px',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        fontSize: '0.8rem',
+                        alignItems: 'center',
+                        fontSize: '0.825rem',
                       }}
                     >
                       <div>
-                        <div style={{ fontWeight: 600, color: '#f1f5f9' }}>{src.description}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Expected Date: {src.date}</div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{src.description}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Expected Date: {src.date}</div>
                       </div>
-                      <div style={{ fontWeight: 700, color: '#34d399' }}>
+                      <div style={{ fontWeight: 700, color: 'var(--brand-emerald)', fontSize: '0.9rem' }}>
                         +{currencySymbol}
                         {(src.amountMinor / 100).toLocaleString('en-IN')}
                       </div>
@@ -314,31 +316,32 @@ export const ForecastView: React.FC<ForecastViewProps> = ({ forecast, currencySy
 
             {/* Outflow Sources */}
             <div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f87171', marginBottom: '8px' }}>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--brand-rose)', marginBottom: '8px' }}>
                 Outflow Records ({selectedWeek.outflowSources.length})
               </div>
               {selectedWeek.outflowSources.length === 0 ? (
-                <div style={{ fontSize: '0.8rem', color: '#64748b' }}>No bills or expenses due this week.</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>No bills or expenses due this week.</div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   {selectedWeek.outflowSources.map((src, i) => (
                     <div
                       key={i}
                       style={{
-                        padding: '8px 12px',
-                        background: 'rgba(239, 68, 68, 0.06)',
-                        border: '1px solid rgba(239, 68, 68, 0.15)',
-                        borderRadius: '6px',
+                        padding: '10px 12px',
+                        background: 'var(--brand-rose-light)',
+                        border: '1px solid var(--brand-rose-border)',
+                        borderRadius: '8px',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        fontSize: '0.8rem',
+                        alignItems: 'center',
+                        fontSize: '0.825rem',
                       }}
                     >
                       <div>
-                        <div style={{ fontWeight: 600, color: '#f1f5f9' }}>{src.description}</div>
-                        <div style={{ fontSize: '0.7rem', color: '#94a3b8' }}>Due Date: {src.date}</div>
+                        <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{src.description}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Due Date: {src.date}</div>
                       </div>
-                      <div style={{ fontWeight: 700, color: '#f87171' }}>
+                      <div style={{ fontWeight: 700, color: 'var(--brand-rose)', fontSize: '0.9rem' }}>
                         -{currencySymbol}
                         {(src.amountMinor / 100).toLocaleString('en-IN')}
                       </div>

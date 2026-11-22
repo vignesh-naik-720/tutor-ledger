@@ -134,11 +134,24 @@ export const api = {
   createExpense: (data: { description: string; amount_minor: number; expense_date: string }) =>
     request<{ expense: OneOffExpense }>('/expenses', { method: 'POST', body: JSON.stringify(data) }),
 
-  // Alerts & AI
+  // Alerts & AI & WhatsApp
   getAlerts: () => request<{ alerts: AppAlert[]; count: number }>('/alerts'),
   getCashFlowInsights: () => request<{ insights: CashFlowInsight }>('/ai/cashflow-insights'),
   parsePaymentMessageAI: (text: string) => request<{ result: any }>('/ai/parse-payment', { method: 'POST', body: JSON.stringify({ text }) }),
   draftReminderAI: (data: any) => request<any>('/ai/draft-reminder', { method: 'POST', body: JSON.stringify(data) }),
+  simulateWhatsApp: (text: string) =>
+    request<{ reply: string; action?: string; hasPending?: boolean }>('/whatsapp/simulate', {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    }),
+  getWhatsAppStatus: () =>
+    request<{
+      status: string;
+      webhookUrl: string;
+      twilioSandboxNumber: string;
+      hasPendingVerification: boolean;
+      pendingDetails: { student: string; amount: number; method: string } | null;
+    }>('/whatsapp/status'),
 
   // Settings & Export
   getSettings: () => request<{ settings: LedgerSettings }>('/settings'),

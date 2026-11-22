@@ -61,7 +61,7 @@ export const ScenariosView: React.FC<ScenariosViewProps> = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>🔮 What-If Scenarios</h2>
-          <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             Simulate risks and decisions before they happen. Toggling updates the 13-week cash curve immediately without altering recorded ledger records (FR-038).
           </p>
         </div>
@@ -75,9 +75,10 @@ export const ScenariosView: React.FC<ScenariosViewProps> = ({
       {/* Comparison Impact Bar */}
       {scenarioLowest !== null && (
         <div
-          className="glass-card"
+          className="bento-card"
           style={{
-            borderLeft: '4px solid #6366f1',
+            borderLeft: '4px solid var(--brand-primary)',
+            background: 'var(--brand-primary-light)',
             padding: '16px 20px',
             display: 'flex',
             justifyContent: 'space-between',
@@ -87,11 +88,11 @@ export const ScenariosView: React.FC<ScenariosViewProps> = ({
           }}
         >
           <div>
-            <div style={{ fontWeight: 800, fontSize: '1rem', color: '#818cf8' }}>
+            <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--brand-primary)' }}>
               Scenario Comparison Active vs Baseline
             </div>
-            <div style={{ fontSize: '0.85rem', color: '#cbd5e1', marginTop: '2px' }}>
-              Baseline lowest: <strong>{currencySymbol}{baselineLowest.toLocaleString('en-IN')}</strong>. Scenario lowest: <strong style={{ color: scenarioLowest < baselineLowest ? '#f87171' : '#34d399' }}>{currencySymbol}{scenarioLowest.toLocaleString('en-IN')}</strong> in Week {scenarioWeek}.
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+              Baseline lowest: <strong>{currencySymbol}{baselineLowest.toLocaleString('en-IN')}</strong>. Scenario lowest: <strong style={{ color: scenarioLowest < baselineLowest ? 'var(--brand-rose)' : 'var(--brand-emerald)' }}>{currencySymbol}{scenarioLowest.toLocaleString('en-IN')}</strong> in Week {scenarioWeek}.
             </div>
           </div>
           <div className="badge badge-indigo">
@@ -101,7 +102,7 @@ export const ScenariosView: React.FC<ScenariosViewProps> = ({
       )}
 
       {error && (
-        <div style={{ padding: '10px 14px', background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', borderRadius: '8px', fontSize: '0.85rem' }}>
+        <div style={{ padding: '10px 14px', background: 'var(--badge-rose-bg)', color: 'var(--badge-rose-text)', border: '1px solid rgba(225, 29, 72, 0.2)', borderRadius: '8px', fontSize: '0.85rem' }}>
           {error}
         </div>
       )}
@@ -113,14 +114,14 @@ export const ScenariosView: React.FC<ScenariosViewProps> = ({
           return (
             <div
               key={sc.id}
-              className="glass-card"
+              className="bento-card"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 padding: '20px',
-                borderColor: sc.is_on ? '#10b981' : 'rgba(255, 255, 255, 0.08)',
-                background: sc.is_on ? 'rgba(16, 185, 129, 0.08)' : 'rgba(30, 41, 59, 0.7)',
+                borderColor: sc.is_on ? 'var(--brand-emerald)' : 'var(--border-color)',
+                background: sc.is_on ? 'var(--badge-emerald-bg)' : 'var(--card-bg)',
               }}
             >
               <div>
@@ -128,16 +129,16 @@ export const ScenariosView: React.FC<ScenariosViewProps> = ({
                   <span className={`badge ${sc.is_on ? 'badge-emerald' : 'badge-indigo'}`}>
                     {sc.type.replace('builtin_', '').replace('_', ' ')}
                   </span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: sc.is_on ? '#34d399' : '#64748b' }}>
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: sc.is_on ? 'var(--brand-emerald)' : 'var(--text-muted)' }}>
                     {sc.is_on ? 'ON (ACTIVE)' : 'OFF'}
                   </span>
                 </div>
 
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#f8fafc', marginBottom: '8px' }}>
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '8px' }}>
                   {sc.name}
                 </h3>
 
-                <p style={{ fontSize: '0.8rem', color: '#94a3b8', lineHeight: '1.4', marginBottom: '16px' }}>
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginBottom: '16px' }}>
                   {sc.type === 'builtin_late_payment' && 'Shifts expected fee receipts 15 days later to stress-test your cash reserve.'}
                   {sc.type === 'builtin_bill_rise' && 'Models a 15% increase in classroom rent or utility costs.'}
                   {sc.type === 'builtin_new_family' && 'Simulates cash inflows from a new regular tuition student joining.'}
@@ -162,13 +163,13 @@ export const ScenariosView: React.FC<ScenariosViewProps> = ({
       {/* Custom Scenario Modal */}
       {showCustomModal && (
         <div className="modal-backdrop">
-          <div className="glass-card" style={{ maxWidth: '440px', width: '100%' }}>
+          <div className="bento-card" style={{ maxWidth: '440px', width: '100%' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '12px' }}>
               Create Custom What-If Scenario
             </h3>
             <form onSubmit={handleCreateCustom} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Scenario Title
                 </label>
                 <input
@@ -181,7 +182,7 @@ export const ScenariosView: React.FC<ScenariosViewProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Additional Outflow Amount ({currencySymbol})
                 </label>
                 <input

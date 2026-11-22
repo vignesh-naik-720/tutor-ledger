@@ -108,20 +108,20 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>📝 Invoices & Payments</h2>
-          <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>📝 Invoices & Payments</h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             Create an invoice in 1 confirmation step using saved family defaults. Mark paid in full or partial in 2 taps (FR-016..FR-018).
           </p>
         </div>
 
-        <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
+        <button className="btn-primary mobile-full-width" onClick={() => setShowCreateModal(true)}>
           <Plus size={16} />
           Create Invoice
         </button>
       </div>
 
       {notice && (
-        <div style={{ padding: '10px 14px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderRadius: '8px', fontSize: '0.85rem' }}>
+        <div style={{ padding: '10px 14px', background: 'var(--brand-emerald-light)', border: '1px solid var(--brand-emerald-border)', color: 'var(--brand-emerald)', borderRadius: '10px', fontSize: '0.85rem', fontWeight: 600 }}>
           {notice}
         </div>
       )}
@@ -129,8 +129,8 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
       {/* Invoice List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {invoices.length === 0 ? (
-          <div className="glass-card" style={{ textAlign: 'center', padding: '40px' }}>
-            <p style={{ color: '#94a3b8' }}>No invoices created yet. Click "Create Invoice" to issue one using family defaults.</p>
+          <div className="bento-card" style={{ textAlign: 'center', padding: '40px' }}>
+            <p style={{ color: 'var(--text-muted)' }}>No invoices created yet. Click "Create Invoice" to issue one using family defaults.</p>
           </div>
         ) : (
           invoices.map((inv) => {
@@ -142,9 +142,9 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
             return (
               <div
                 key={inv.id}
-                className="glass-card"
+                className="bento-card mobile-stack"
                 style={{
-                  padding: '18px 24px',
+                  padding: '18px 20px',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
@@ -152,9 +152,9 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                   gap: '16px',
                 }}
               >
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#f8fafc' }}>
+                <div style={{ flex: 1, minWidth: '240px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-main)' }}>
                       {inv.family_name || 'Tutoring Family'}
                     </span>
                     <span className={`badge ${isPaid ? 'badge-emerald' : isPartial ? 'badge-amber' : 'badge-rose'}`}>
@@ -162,30 +162,30 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '14px', fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>
+                  <div style={{ display: 'flex', gap: '14px', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px', flexWrap: 'wrap' }}>
                     <span>Issue: {inv.issue_date}</span>
                     <span>Due: {inv.due_date}</span>
                     <span>Total: {currencySymbol}{total.toLocaleString('en-IN')}</span>
-                    {isPartial && <span style={{ color: '#fbbf24' }}>Remaining: {currencySymbol}{remaining.toLocaleString('en-IN')}</span>}
+                    {isPartial && <span style={{ color: 'var(--brand-amber)', fontWeight: 700 }}>Remaining: {currencySymbol}{remaining.toLocaleString('en-IN')}</span>}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: isPaid ? '#34d399' : '#f8fafc' }}>
+                <div className="mobile-stack mobile-full-width" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ textAlign: 'right' }} className="mobile-full-width">
+                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: isPaid ? 'var(--brand-emerald)' : 'var(--text-main)' }}>
                       {currencySymbol}
                       {remaining.toLocaleString('en-IN')}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>{isPaid ? 'Paid in Full' : 'Due'}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{isPaid ? 'Paid in Full' : 'Due'}</div>
                   </div>
 
                   {!isPaid && (
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button className="btn-primary" onClick={() => handleQuickPayFull(inv)} title="Mark Paid in Full in 1 tap">
+                    <div style={{ display: 'flex', gap: '8px' }} className="mobile-full-width">
+                      <button className="btn-primary mobile-full-width" onClick={() => handleQuickPayFull(inv)} title="Mark Paid in Full in 1 tap">
                         <Check size={14} />
                         Mark Paid (2 Taps)
                       </button>
-                      <button className="btn-secondary" onClick={() => handleOpenPartialPayModal(inv)} title="Record partial payment">
+                      <button className="btn-secondary mobile-full-width" onClick={() => handleOpenPartialPayModal(inv)} title="Record partial payment">
                         <CreditCard size={14} />
                         Partial
                       </button>
@@ -201,21 +201,21 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
       {/* 1-Step Invoice Creation Modal (FR-016) */}
       {showCreateModal && (
         <div className="modal-backdrop">
-          <div className="glass-card" style={{ maxWidth: '440px', width: '100%', border: '1px solid #10b981' }}>
+          <div className="bento-card" style={{ maxWidth: '440px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Create Invoice in 1 Confirmation</h3>
-              <button style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }} onClick={() => setShowCreateModal(false)}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>Create Invoice in 1 Confirmation</h3>
+              <button style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }} onClick={() => setShowCreateModal(false)}>
                 <X size={18} />
               </button>
             </div>
 
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '16px' }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
               Select a family. The invoice fee and payment term are automatically pre-filled from that family's saved defaults.
             </p>
 
             <form onSubmit={handleCreateInvoice} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Select Family
                 </label>
                 <select
@@ -233,25 +233,25 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
               </div>
 
               {selectedFamily && (
-                <div style={{ background: 'rgba(0, 0, 0, 0.25)', padding: '12px', borderRadius: '8px', fontSize: '0.85rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8' }}>
+                <div style={{ background: 'var(--bg-surface-subtle)', border: '1px solid var(--border-color)', padding: '12px', borderRadius: '10px', fontSize: '0.85rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
                     <span>Default Fee:</span>
-                    <strong style={{ color: '#34d399' }}>{currencySymbol}{(selectedFamily.default_fee_minor / 100).toLocaleString('en-IN')}</strong>
+                    <strong style={{ color: 'var(--brand-emerald)' }}>{currencySymbol}{(selectedFamily.default_fee_minor / 100).toLocaleString('en-IN')}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94a3b8', marginTop: '4px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)', marginTop: '4px' }}>
                     <span>Payment Term:</span>
-                    <strong style={{ color: '#f8fafc' }}>{selectedFamily.default_term_days} days</strong>
+                    <strong style={{ color: 'var(--text-main)' }}>{selectedFamily.default_term_days} days</strong>
                   </div>
                 </div>
               )}
 
-              {error && <div style={{ color: '#f87171', fontSize: '0.8rem' }}>{error}</div>}
+              {error && <div style={{ color: 'var(--brand-rose)', fontSize: '0.8rem', background: 'var(--brand-rose-light)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--brand-rose-border)' }}>{error}</div>}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
-                <button type="button" className="btn-secondary" onClick={() => setShowCreateModal(false)}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }} className="mobile-stack">
+                <button type="button" className="btn-secondary mobile-full-width" onClick={() => setShowCreateModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary" disabled={creating}>
+                <button type="submit" className="btn-primary mobile-full-width" disabled={creating}>
                   {creating ? 'Creating...' : 'Confirm & Create Invoice'}
                 </button>
               </div>
@@ -263,17 +263,17 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
       {/* Partial / Custom Payment Modal */}
       {payingInvoice && (
         <div className="modal-backdrop">
-          <div className="glass-card" style={{ maxWidth: '420px', width: '100%' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '10px' }}>
+          <div className="bento-card" style={{ maxWidth: '420px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '10px' }}>
               Record Payment
             </h3>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '14px' }}>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
               For {payingInvoice.family_name || 'Family'}. Remaining due: {currencySymbol}{((payingInvoice.remaining_minor ?? payingInvoice.amount_minor) / 100).toLocaleString('en-IN')}.
             </p>
 
             <form onSubmit={handleRecordCustomPayment} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Payment Amount ({currencySymbol})
                 </label>
                 <input
@@ -286,11 +286,11 @@ export const InvoicesView: React.FC<InvoicesViewProps> = ({
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
-                <button type="button" className="btn-secondary" onClick={() => setPayingInvoice(null)}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }} className="mobile-stack">
+                <button type="button" className="btn-secondary mobile-full-width" onClick={() => setPayingInvoice(null)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary" disabled={recordingPay}>
+                <button type="submit" className="btn-primary mobile-full-width" disabled={recordingPay}>
                   {recordingPay ? 'Saving...' : 'Record Payment'}
                 </button>
               </div>

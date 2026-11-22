@@ -171,7 +171,7 @@ function parsePaymentMessageLocal(
   // Detect reference ID
   let refId: string | null = null;
   const refMatch =
-    /(?:ref|utr|txn|transaction|id|ref\s*no\.?)\s*[:\-]?\s*([a-zA-Z0-9]{8,24})/i.exec(text);
+    /(?:ref|utr|txn|transaction|id|ref\s*no\.?)\s*[:\-]?\s*([a-zA-Z0-9\-_]{8,28})/i.exec(text);
   if (refMatch?.[1]) {
     refId = refMatch[1];
   }

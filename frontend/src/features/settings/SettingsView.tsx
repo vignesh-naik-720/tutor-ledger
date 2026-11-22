@@ -116,21 +116,21 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       <div>
         <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>⚙️ Settings & Ledger Configuration</h2>
-        <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
           Configure your safety cushion threshold, recurring monthly expenses, sample dataset, and full ledger export.
         </p>
       </div>
 
       {notice && (
-        <div style={{ padding: '10px 14px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderRadius: '8px', fontSize: '0.85rem' }}>
+        <div style={{ padding: '10px 14px', background: 'var(--badge-emerald-bg)', color: 'var(--badge-emerald-text)', border: '1px solid rgba(5, 150, 105, 0.2)', borderRadius: '8px', fontSize: '0.85rem' }}>
           {notice}
         </div>
       )}
 
       {/* Minimum Safety Cushion Settings */}
-      <div className="glass-card">
+      <div className="bento-card">
         <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '6px' }}>Minimum Safety Cushion</h3>
-        <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '16px' }}>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
           The minimum bank reserve you want to maintain. When the 13-week forecast dips below this amount, smart cash alerts trigger.
         </p>
 
@@ -151,11 +151,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* Recurring Monthly Bills */}
-      <div className="glass-card">
+      <div className="bento-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
           <div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 700 }}>Recurring Monthly Bills</h3>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Tuition room rent, broadband, teaching software, etc.</p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Tuition room rent, broadband, teaching software, etc.</p>
           </div>
           <button className="btn-secondary" onClick={() => setShowBillModal(true)}>
             <Plus size={16} />
@@ -171,16 +171,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 display: 'flex',
                 justifyContent: 'space-between',
                 padding: '12px 16px',
-                background: 'rgba(0, 0, 0, 0.2)',
+                background: 'var(--card-bg-secondary)',
+                border: '1px solid var(--border-color)',
                 borderRadius: '8px',
                 fontSize: '0.875rem',
               }}
             >
               <div>
-                <span style={{ fontWeight: 600, color: '#f8fafc' }}>{b.name}</span>
-                <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: '10px' }}>Next due: {b.next_due_date}</span>
+                <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{b.name}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '10px' }}>Next due: {b.next_due_date}</span>
               </div>
-              <strong style={{ color: '#f87171' }}>
+              <strong style={{ color: 'var(--brand-rose)' }}>
                 -{currencySymbol}{(b.amount_minor / 100).toLocaleString('en-IN')}/mo
               </strong>
             </div>
@@ -189,22 +190,22 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* Sample Data & Full Export */}
-      <div className="glass-card">
+      <div className="bento-card">
         <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '6px' }}>Sample Dataset & Backup</h3>
-        <p style={{ fontSize: '0.85rem', color: '#94a3b8', marginBottom: '16px' }}>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
           Instantly load realistic sample data (12 families, bills, week 7 cash dip) or download a full backup.
         </p>
 
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <button className="btn-secondary" onClick={handleLoadSampleData} disabled={sampleLoading}>
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }} className="mobile-stack">
+          <button className="btn-secondary mobile-full-width" onClick={handleLoadSampleData} disabled={sampleLoading}>
             <RefreshCw size={16} />
             {sampleLoading ? 'Processing...' : 'Load 12 Families Sample Data (FR-014)'}
           </button>
-          <button className="btn-secondary" style={{ color: '#f87171' }} onClick={handleRemoveSampleData} disabled={sampleLoading}>
+          <button className="btn-secondary mobile-full-width" style={{ color: 'var(--brand-rose)', borderColor: 'rgba(225, 29, 72, 0.25)' }} onClick={handleRemoveSampleData} disabled={sampleLoading}>
             <Trash2 size={16} />
             Remove Sample Data Only
           </button>
-          <button className="btn-primary" onClick={handleExportData} disabled={exporting}>
+          <button className="btn-primary mobile-full-width" onClick={handleExportData} disabled={exporting}>
             <Download size={16} />
             {exporting ? 'Exporting...' : 'Export Full Ledger (JSON)'}
           </button>
@@ -214,11 +215,11 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       {/* Bill Add Modal */}
       {showBillModal && (
         <div className="modal-backdrop">
-          <div className="glass-card" style={{ maxWidth: '420px', width: '100%' }}>
+          <div className="bento-card" style={{ maxWidth: '420px', width: '100%' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '12px' }}>Add Recurring Monthly Bill</h3>
             <form onSubmit={handleAddBill} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px' }}>Bill Name</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Bill Name</label>
                 <input
                   type="text"
                   className="input-field"
@@ -230,7 +231,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Amount ({currencySymbol}/mo)
                 </label>
                 <input
@@ -243,7 +244,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#cbd5e1', marginBottom: '4px' }}>Next Due Date</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Next Due Date</label>
                 <input
                   type="date"
                   className="input-field"

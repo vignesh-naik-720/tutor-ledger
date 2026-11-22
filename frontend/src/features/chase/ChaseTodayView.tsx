@@ -119,8 +119,8 @@ export const ChaseTodayView: React.FC<ChaseTodayViewProps> = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>⚡ Chase Today Queue</h2>
-          <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>⚡ Chase Today Queue</h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             Overdue invoices ranked by Priority Score (Amount Owed × Days Overdue). Ties ordered by older due date.
           </p>
         </div>
@@ -130,10 +130,10 @@ export const ChaseTodayView: React.FC<ChaseTodayViewProps> = ({
       </div>
 
       {items.length === 0 ? (
-        <div className="glass-card" style={{ textAlign: 'center', padding: '40px 20px' }}>
-          <CheckCircle size={44} color="#10b981" style={{ margin: '0 auto 12px' }} />
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Chase Queue is Clean!</h3>
-          <p style={{ fontSize: '0.875rem', color: '#94a3b8', marginTop: '4px' }}>
+        <div className="bento-card" style={{ textAlign: 'center', padding: '40px 20px' }}>
+          <CheckCircle size={44} color="var(--brand-emerald)" style={{ margin: '0 auto 12px' }} />
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)' }}>Chase Queue is Clean!</h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '4px' }}>
             No overdue invoices waiting. All tutoring families have paid or are within their payment terms.
           </p>
         </div>
@@ -144,60 +144,62 @@ export const ChaseTodayView: React.FC<ChaseTodayViewProps> = ({
             return (
               <div
                 key={it.invoice_id}
-                className="glass-card"
+                className="bento-card mobile-stack"
                 style={{
-                  padding: '18px 24px',
+                  padding: '18px 20px',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
                   flexWrap: 'wrap',
                   gap: '16px',
-                  borderLeft: idx === 0 ? '4px solid #ef4444' : idx < 3 ? '4px solid #f59e0b' : '4px solid #3b82f6',
+                  borderLeft: idx === 0 ? '4px solid var(--brand-rose)' : idx < 3 ? '4px solid var(--brand-amber)' : '4px solid var(--brand-primary)',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '240px' }}>
                   <div
                     style={{
-                      width: '40px',
-                      height: '40px',
+                      width: '38px',
+                      height: '38px',
                       borderRadius: '10px',
-                      background: 'rgba(255, 255, 255, 0.05)',
+                      background: 'var(--bg-surface-subtle)',
+                      border: '1px solid var(--border-color)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontWeight: 800,
-                      color: idx === 0 ? '#f87171' : '#cbd5e1',
+                      fontSize: '0.9rem',
+                      color: idx === 0 ? 'var(--brand-rose)' : 'var(--text-secondary)',
+                      flexShrink: 0,
                     }}
                   >
                     #{idx + 1}
                   </div>
 
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontWeight: 700, fontSize: '1.05rem', color: '#f8fafc' }}>{it.family_name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-main)' }}>{it.family_name}</span>
                       <span className="badge badge-rose">{it.days_overdue} days late</span>
                       {it.thin_history && <span className="badge badge-indigo">Thin History</span>}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '14px', fontSize: '0.8rem', color: '#94a3b8', marginTop: '4px' }}>
-                      <span>Phone: {it.phone_masked}</span>
+                    <div style={{ display: 'flex', gap: '12px', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px', flexWrap: 'wrap' }}>
+                      <span>Phone: <strong style={{ color: 'var(--text-secondary)' }}>{it.phone_masked}</strong></span>
                       <span>Due: {it.due_date}</span>
                       <span>Score: {it.priority_score.toLocaleString('en-IN')}</span>
-                      <span>Default tone: {it.default_tone}</span>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f8fafc' }}>
+                <div className="mobile-stack mobile-full-width" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{ textAlign: 'right' }} className="mobile-full-width">
+                    <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-main)' }}>
                       {currencySymbol}
                       {amount.toLocaleString('en-IN')}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Outstanding</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Outstanding</div>
                   </div>
 
-                  <button className="btn-whatsapp" onClick={() => handleOpenDraftModal(it)}>
+                  <button className="btn-whatsapp mobile-full-width" onClick={() => handleOpenDraftModal(it)}>
                     <MessageSquare size={16} />
                     Chase on WhatsApp
                   </button>
@@ -211,41 +213,41 @@ export const ChaseTodayView: React.FC<ChaseTodayViewProps> = ({
       {/* Review & Send Modal */}
       {activeItem && (
         <div className="modal-backdrop">
-          <div className="glass-card" style={{ maxWidth: '560px', width: '100%', border: '1px solid #10b981' }}>
+          <div className="bento-card" style={{ maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <MessageSquare size={22} color="#25d366" />
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Review WhatsApp Reminder</h3>
+                <MessageSquare size={22} color="var(--brand-emerald)" />
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-main)' }}>Review WhatsApp Reminder</h3>
               </div>
               <button
-                style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
                 onClick={() => setActiveItem(null)}
               >
                 <X size={20} />
               </button>
             </div>
 
-            <div style={{ background: 'rgba(0, 0, 0, 0.25)', padding: '12px 16px', borderRadius: '10px', marginBottom: '16px' }}>
+            <div style={{ background: 'var(--bg-surface-subtle)', border: '1px solid var(--border-color)', padding: '12px 16px', borderRadius: '10px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
-                <span style={{ color: '#94a3b8' }}>Recipient:</span>
-                <span style={{ fontWeight: 700 }}>{activeItem.family_name}</span>
+                <span style={{ color: 'var(--text-muted)' }}>Recipient:</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>{activeItem.family_name}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginTop: '4px' }}>
-                <span style={{ color: '#94a3b8' }}>Amount Owed:</span>
-                <span style={{ fontWeight: 700, color: '#34d399' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Amount Owed:</span>
+                <span style={{ fontWeight: 700, color: 'var(--brand-emerald)' }}>
                   {currencySymbol}
                   {(activeItem.remaining_minor / 100).toLocaleString('en-IN')}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginTop: '4px' }}>
-                <span style={{ color: '#94a3b8' }}>Days Overdue:</span>
-                <span style={{ fontWeight: 700, color: '#fb7185' }}>{activeItem.days_overdue} days</span>
+                <span style={{ color: 'var(--text-muted)' }}>Days Overdue:</span>
+                <span style={{ fontWeight: 700, color: 'var(--brand-rose)' }}>{activeItem.days_overdue} days</span>
               </div>
             </div>
 
             {/* Tone Selector */}
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '6px' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 Select Reminder Tone:
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
@@ -259,9 +261,9 @@ export const ChaseTodayView: React.FC<ChaseTodayViewProps> = ({
                       fontSize: '0.75rem',
                       fontWeight: 700,
                       textTransform: 'capitalize',
-                      border: tone === t ? '2px solid #10b981' : '1px solid #334155',
-                      background: tone === t ? 'rgba(16, 185, 129, 0.2)' : 'rgba(30, 41, 59, 0.6)',
-                      color: tone === t ? '#34d399' : '#94a3b8',
+                      border: tone === t ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)',
+                      background: tone === t ? 'var(--brand-primary-light)' : 'var(--bg-surface-subtle)',
+                      color: tone === t ? 'var(--brand-primary)' : 'var(--text-secondary)',
                       cursor: 'pointer',
                     }}
                     onClick={() => handleRegenerateDraft(t)}
@@ -279,10 +281,10 @@ export const ChaseTodayView: React.FC<ChaseTodayViewProps> = ({
             {/* Drafted Message preview */}
             <div style={{ marginBottom: '14px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
                   Proposed Message (Plain text for WhatsApp):
                 </label>
-                <span style={{ fontSize: '0.75rem', color: draftedText.length > 500 ? '#f43f5e' : '#94a3b8' }}>
+                <span style={{ fontSize: '0.75rem', color: draftedText.length > 500 ? 'var(--brand-rose)' : 'var(--text-muted)' }}>
                   {draftedText.length}/500 chars
                 </span>
               </div>
@@ -303,8 +305,8 @@ export const ChaseTodayView: React.FC<ChaseTodayViewProps> = ({
                 alignItems: 'flex-start',
                 gap: '10px',
                 padding: '12px',
-                background: 'rgba(16, 185, 129, 0.08)',
-                border: '1px solid rgba(16, 185, 129, 0.2)',
+                background: 'var(--brand-emerald-light)',
+                border: '1px solid var(--brand-emerald-border)',
                 borderRadius: '8px',
                 marginBottom: '16px',
               }}
@@ -316,29 +318,29 @@ export const ChaseTodayView: React.FC<ChaseTodayViewProps> = ({
                 onChange={(e) => setOwnerConfirmed(e.target.checked)}
                 style={{ marginTop: '3px', cursor: 'pointer' }}
               />
-              <label htmlFor="confirmSend" style={{ fontSize: '0.8rem', color: '#cbd5e1', cursor: 'pointer' }}>
+              <label htmlFor="confirmSend" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', cursor: 'pointer' }}>
                 <strong>I have reviewed this reminder.</strong> Nothing is sent automatically; this button will open my
                 WhatsApp with the text pre-filled so I can press send myself.
               </label>
             </div>
 
             {error && (
-              <div style={{ padding: '8px 12px', background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', borderRadius: '6px', fontSize: '0.8rem', marginBottom: '12px' }}>
+              <div style={{ padding: '8px 12px', background: 'var(--brand-rose-light)', border: '1px solid var(--brand-rose-border)', color: 'var(--brand-rose)', borderRadius: '8px', fontSize: '0.8rem', marginBottom: '12px' }}>
                 {error}
               </div>
             )}
             {successNotice && (
-              <div style={{ padding: '8px 12px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', borderRadius: '6px', fontSize: '0.8rem', marginBottom: '12px' }}>
+              <div style={{ padding: '8px 12px', background: 'var(--brand-emerald-light)', border: '1px solid var(--brand-emerald-border)', color: 'var(--brand-emerald)', borderRadius: '8px', fontSize: '0.8rem', marginBottom: '12px' }}>
                 {successNotice}
               </div>
             )}
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button className="btn-secondary" onClick={() => setActiveItem(null)}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }} className="mobile-stack">
+              <button className="btn-secondary mobile-full-width" onClick={() => setActiveItem(null)}>
                 Cancel
               </button>
               <button
-                className="btn-whatsapp"
+                className="btn-whatsapp mobile-full-width"
                 onClick={handleOpenInWhatsApp}
                 disabled={!ownerConfirmed || openingWa || loadingDraft}
               >

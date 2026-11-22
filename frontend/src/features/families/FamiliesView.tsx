@@ -56,13 +56,13 @@ export const FamiliesView: React.FC<FamiliesViewProps> = ({ families, currencySy
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>👨‍👩‍👧‍👦 Tutoring Families</h2>
-          <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)' }}>👨‍👩‍👧‍👦 Tutoring Families</h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             Store essential details (name, phone, default fee, term days, preferred reminder tone). Personal data is encrypted at rest (FR-004, FR-008).
           </p>
         </div>
 
-        <button className="btn-primary" onClick={() => setShowAddModal(true)}>
+        <button className="btn-primary mobile-full-width" onClick={() => setShowAddModal(true)}>
           <Plus size={16} />
           Add Family
         </button>
@@ -70,12 +70,12 @@ export const FamiliesView: React.FC<FamiliesViewProps> = ({ families, currencySy
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
         {families.map((f) => (
-          <div key={f.id} className="glass-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div key={f.id} className="bento-card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                 <span className="badge badge-emerald">{f.default_tone}</span>
                 <button
-                  style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
                   onClick={() => handleDelete(f)}
                   title="Permanently Delete Family"
                 >
@@ -83,26 +83,26 @@ export const FamiliesView: React.FC<FamiliesViewProps> = ({ families, currencySy
                 </button>
               </div>
 
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f8fafc', marginBottom: '4px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '4px' }}>
                 {f.name}
               </h3>
-              <div style={{ fontSize: '0.8rem', color: '#94a3b8', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '12px' }}>
                 <Phone size={13} />
                 <span>{f.phone_masked}</span>
               </div>
 
-              <div style={{ background: 'rgba(0, 0, 0, 0.2)', padding: '10px 12px', borderRadius: '8px', fontSize: '0.825rem' }}>
+              <div style={{ background: 'var(--bg-surface-subtle)', border: '1px solid var(--border-color)', padding: '10px 12px', borderRadius: '10px', fontSize: '0.825rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span style={{ color: '#94a3b8' }}>Default Fee:</span>
-                  <strong>{currencySymbol}{(f.default_fee_minor / 100).toLocaleString('en-IN')}</strong>
+                  <span style={{ color: 'var(--text-muted)' }}>Default Fee:</span>
+                  <strong style={{ color: 'var(--text-main)' }}>{currencySymbol}{(f.default_fee_minor / 100).toLocaleString('en-IN')}</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span style={{ color: '#94a3b8' }}>Payment Term:</span>
-                  <strong>{f.default_term_days} days</strong>
+                  <span style={{ color: 'var(--text-muted)' }}>Payment Term:</span>
+                  <strong style={{ color: 'var(--text-main)' }}>{f.default_term_days} days</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#94a3b8' }}>Payment Delay:</span>
-                  <span>{f.avg_delay_days !== null ? `${Math.round(f.avg_delay_days)} days` : 'No history yet'}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>Payment Delay:</span>
+                  <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>{f.avg_delay_days !== null ? `${Math.round(f.avg_delay_days)} days` : 'No history yet'}</span>
                 </div>
               </div>
             </div>
@@ -112,17 +112,17 @@ export const FamiliesView: React.FC<FamiliesViewProps> = ({ families, currencySy
 
       {showAddModal && (
         <div className="modal-backdrop">
-          <div className="glass-card" style={{ maxWidth: '440px', width: '100%' }}>
+          <div className="bento-card" style={{ maxWidth: '440px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>Add New Family</h3>
-              <button style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }} onClick={() => setShowAddModal(false)}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>Add New Family</h3>
+              <button style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }} onClick={() => setShowAddModal(false)}>
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleAddFamily} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Family / Student Name
                 </label>
                 <input
@@ -136,7 +136,7 @@ export const FamiliesView: React.FC<FamiliesViewProps> = ({ families, currencySy
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Phone Number (with Country Code, E.164)
                 </label>
                 <input
@@ -151,7 +151,7 @@ export const FamiliesView: React.FC<FamiliesViewProps> = ({ families, currencySy
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                     Fee ({currencySymbol})
                   </label>
                   <input
@@ -163,7 +163,7 @@ export const FamiliesView: React.FC<FamiliesViewProps> = ({ families, currencySy
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                     Term (Days)
                   </label>
                   <input
@@ -177,7 +177,7 @@ export const FamiliesView: React.FC<FamiliesViewProps> = ({ families, currencySy
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '4px' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Default Reminder Tone
                 </label>
                 <select className="input-field" value={tone} onChange={(e) => setTone(e.target.value as any)}>
@@ -187,13 +187,13 @@ export const FamiliesView: React.FC<FamiliesViewProps> = ({ families, currencySy
                 </select>
               </div>
 
-              {error && <div style={{ color: '#f87171', fontSize: '0.8rem' }}>{error}</div>}
+              {error && <div style={{ color: 'var(--brand-rose)', fontSize: '0.8rem', background: 'var(--brand-rose-light)', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--brand-rose-border)' }}>{error}</div>}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }}>
-                <button type="button" className="btn-secondary" onClick={() => setShowAddModal(false)}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '8px' }} className="mobile-stack">
+                <button type="button" className="btn-secondary mobile-full-width" onClick={() => setShowAddModal(false)}>
                   Cancel
                 </button>
-                <button type="submit" className="btn-primary" disabled={loading}>
+                <button type="submit" className="btn-primary mobile-full-width" disabled={loading}>
                   {loading ? 'Saving...' : 'Add Family'}
                 </button>
               </div>
