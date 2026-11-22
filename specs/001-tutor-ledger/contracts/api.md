@@ -89,8 +89,9 @@ Phone validation and normalisation: research R-4. Phone is returned masked (`+â€
 |---|---|---|---|---|
 | GET | `/bills` | List recurring bills | session | FR-012, FR-033 |
 | POST | `/bills` | Create recurring monthly bill | session, CSRF | FR-012 |
-| PATCH | `/bills/{id}` | Update amount, next due date, active flag | session, CSRF | FR-033 |
+| PATCH | `/bills/{id}` | **Not implemented in current code.** Update amount, next due date, active flag | session, CSRF | FR-033 |
 | POST | `/expenses` | Create one-off expense | session, CSRF | FR-033 |
+| GET | `/expenses` | List one-off expenses | session | FR-033 |
 
 ### Invoices
 
@@ -133,7 +134,7 @@ Open-link response: `{ "url": "https://wa.me/<digits>?text=<encoded>" }` only wh
 | Method | Path | Purpose | Auth | FR |
 |---|---|---|---|---|
 | GET | `/forecast` | 13-week forecast with baseline, best/worst band, confidence per family, lowest cash week, below-minimum flag. Query `scenario_ids` (comma-separated UUIDs, optional) | session | FR-031, FR-032, FR-033, FR-035, FR-037 |
-| GET | `/forecast/lines/{line_id}/sources` | Source invoices, payments, bills or expenses behind a figure | session | FR-034 |
+| GET | `/forecast/lines/{line_id}/sources` | **Not implemented in current code.** Source invoices, payments, bills or expenses behind a figure | session | FR-034 |
 | GET | `/scenarios` | List built-in and custom scenarios with on/off state | session | FR-036 |
 | POST | `/scenarios` | Create custom scenario (allowed transform parameters only) | session, CSRF | FR-036 |
 | PATCH | `/scenarios/{id}` | Switch on or off, or edit parameters | session, CSRF | FR-036, FR-038 |
@@ -150,7 +151,7 @@ Scenario toggles never write to invoices, payments, bills or expenses (FR-038).
 
 | Method | Path | Purpose | Auth | FR |
 |---|---|---|---|---|
-| GET | `/audit` | Paginated audit events (action code, subject type, subject ID, time, counts) | session | FR-010 |
+| GET | `/audit` | **Not implemented in current code.** Paginated audit events (action code, subject type, subject ID, time, counts) | session | FR-010 |
 | GET | `/export` | Full ledger export as a single JSON download with `Content-Disposition: attachment` and no-store caching | session, reauth | FR-005 |
 
 Export contains decrypted personal data by design; it is generated on request, audited as `EXPORT_REQUESTED` (no content in audit), and rate-limited.

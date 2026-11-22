@@ -144,7 +144,7 @@ The app raises a small number of rule-based alerts, capped at most 3 alerts per 
   Acceptance: Given data is sent or stored, when it is inspected, then it is encrypted in transit and at rest and contains no payment credential or bank login detail.
 - **FR-009**: The app MUST NOT move money; it only records and plans.
   Acceptance: Given any payment, bill or forecast action, when it is performed, then no money transfer is initiated and only records or plans change.
-- **FR-010**: The app MUST record each payment, invoice change, and deletion in an audit trail that the owner can view.
+- **FR-010**: The app MUST record each payment, invoice change, and deletion in an audit trail that the owner can view. Current code writes audit events but provides no endpoint or screen to view them; only the export includes audit events.
   Acceptance: Given a payment, invoice change or deletion is saved, when the owner opens the audit trail, then an entry for that change is listed.
 
 **First-run setup (Story 2)**
@@ -226,6 +226,31 @@ The app raises a small number of rule-based alerts, capped at most 3 alerts per 
   Acceptance: Given an alert is shown, when the owner views it, then it displays exactly one action button, and that button opens the drafted reminder, the scenario or the Chase Today queue.
 - **FR-041**: The owner MUST be able to set the minimum-balance threshold, and the app MUST re-evaluate cash alerts when that threshold changes.
   Acceptance: Given the owner saves a new minimum-balance threshold, when the change is saved, then cash alerts are re-evaluated against the new threshold.
+
+### Current behaviour (as implemented)
+
+These behaviours exist in the current code and are recorded here as observed behaviour, not as settled requirements.
+
+- **Alerts**: severity rises with days overdue (more than 14 days = higher severity); at most 3 alerts are shown.
+- **Chase list**: ordered by a score of remaining balance x days overdue, with ties broken by older due date.
+- **Reminders**: tones are friendly, neutral and firm; reminder text is capped at 500 characters. Recording a payment sets the family's reminder "out of date" flag, and opening a reminder link checks that flag.
+- **Payments**: a payment that would exceed the remaining invoice balance is rejected (`OVERPAYMENT`).
+- **Invoices**: an invoice cannot be voided once any payment exists. Repeat invoices are generated once per family per period and start in the "due, awaiting confirmation" state.
+- **Who owes me**: lists only families with a remaining balance, sorted by oldest due date, with a show-all toggle.
+- **Sessions**: idle timeout of 15 minutes, and an absolute session lifetime.
+- **Family deletion**: a permanent hard delete of the family's payments, invoices, reminder drafts and family record. It writes an audit event.
+- **Audit**: audit events are written on almost every mutating action.
+- **Storage**: when no database connection string is set in development, storage falls back to a JSON-file emulator.
+
+#### Sample data
+
+- Sample data seeds fictional families with fake Indian phone numbers.
+- Sample data is removed by deleting only rows flagged as sample data; owner rows remain.
+
+#### Data egress disclosure
+
+- The AI assistant and the WhatsApp-style message parsing send family/student names and amounts to an external AI service (Gemini).
+
 
 ### Key Entities *(include if feature involves data)*
 
