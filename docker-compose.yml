@@ -1,0 +1,69 @@
+services:
+  # 1. PostgreSQL 16 Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: tutor_ledger_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: tutor_ledger
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tutor_ledger"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Web Database Viewer (Adminer) — Teammate can view all tables & data at http://localhost:8080
+  adminer:
+    image: adminer:latest
+    container_name: tutor_ledger_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 3. Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: tutor_ledger_backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      HOST: 0.0.0.0
+      TL_SETUP_SECRET: TUTOR_LEDGER_DEV_SECRET_2026
+      TL_DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/tutor_ledger
+      TL_MIGRATION_DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/tutor_ledger
+      TL_SESSION_PEPPER: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      TL_AUDIT_HMAC_KEY: 123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0
+      TL_FIELD_ENCRYPTION_KEK: 23456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01
+      TL_PHONE_HMAC_KEY: 3456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef012
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 4. Frontend Web App (Nginx)
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: tutor_ledger_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
